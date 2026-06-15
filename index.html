@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="dark" />
+    <title>Relife Portfolio</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <div class="bg-orb bg-orb-a"></div>
+      <div class="bg-orb bg-orb-b"></div>
+
+      <header class="topbar">
+        <div class="brand">
+          <div class="brand-mark">R</div>
+          <div>
+            <p class="eyebrow">Relife</p>
+            <h1>持仓看板</h1>
+          </div>
+        </div>
+
+        <div class="topbar-meta">
+          <span class="meta-pill">TradingView 风格</span>
+          <span class="meta-pill">Batch 1: Holdings</span>
+          <span class="meta-pill meta-pill-accent" id="portfolio-snapshot-label">seed data</span>
+        </div>
+      </header>
+
+      <main class="dashboard">
+        <section class="hero-card panel">
+          <div class="hero-copy">
+            <p class="section-kicker">Portfolio overview</p>
+            <h2>组合总览</h2>
+            <p class="hero-description">
+              先把最常用的持仓视图做好：深色、紧凑、信息密度高，保留 TradingView 的组合感，但不做复杂绩效分析和交易联动。
+            </p>
+
+            <div class="hero-metrics" id="hero-metrics"></div>
+          </div>
+
+          <div class="hero-chart">
+            <div class="panel-header">
+              <div>
+                <p class="panel-kicker">组合曲线</p>
+                <h3>Portfolio pulse</h3>
+              </div>
+              <div class="chart-badge" id="chart-badge">示意曲线</div>
+            </div>
+
+            <div class="chart-frame">
+              <svg id="portfolio-chart" viewBox="0 0 900 300" preserveAspectRatio="none" aria-label="组合曲线"></svg>
+            </div>
+
+            <div class="chart-foot">
+              <span id="chart-start">-</span>
+              <span id="chart-end">-</span>
+            </div>
+          </div>
+        </section>
+
+        <aside class="sidebar panel">
+          <div class="panel-header compact">
+            <div>
+              <p class="panel-kicker">分布</p>
+              <h3>市场 / 账户</h3>
+            </div>
+            <span class="muted">local currency</span>
+          </div>
+
+          <div class="distribution-block">
+            <div class="distribution-title">
+              <span>市场分布</span>
+              <span class="muted" id="market-total-label">-</span>
+            </div>
+            <div id="market-distribution" class="stack-bars"></div>
+          </div>
+
+          <div class="distribution-block">
+            <div class="distribution-title">
+              <span>账户分布</span>
+              <span class="muted" id="account-total-label">-</span>
+            </div>
+            <div id="account-distribution" class="stack-bars"></div>
+          </div>
+
+          <div class="status-card">
+            <p class="panel-kicker">系统状态</p>
+            <div class="status-list">
+              <div>
+                <span class="status-label">最近行情更新时间</span>
+                <strong id="status-quotes">-</strong>
+              </div>
+              <div>
+                <span class="status-label">最近预警检查</span>
+                <strong id="status-alerts">-</strong>
+              </div>
+              <div>
+                <span class="status-label">最近邮件状态</span>
+                <strong id="status-mail">-</strong>
+              </div>
+            </div>
+          </div>
+        </aside>
+
+        <section class="panel filters-panel">
+          <div class="filters-row">
+            <div class="filter-group">
+              <span class="filter-label">市场</span>
+              <div class="segmented" id="market-filters"></div>
+            </div>
+
+            <div class="filter-group">
+              <span class="filter-label">账户</span>
+              <div class="segmented" id="account-filters"></div>
+            </div>
+
+            <div class="filter-group">
+              <span class="filter-label">预警</span>
+              <div class="segmented" id="alert-filters"></div>
+            </div>
+
+            <label class="search-box">
+              <span class="filter-label">搜索</span>
+              <input id="search-input" type="search" placeholder="symbol / name / account" />
+            </label>
+          </div>
+        </section>
+
+        <section class="summary-grid" id="summary-grid"></section>
+
+        <section class="panel holdings-panel">
+          <div class="panel-header">
+            <div>
+              <p class="panel-kicker">Holdings</p>
+              <h3>持仓列表</h3>
+            </div>
+            <div class="table-hint">支持横向滚动 · 按 TradingView 风格简化展示</div>
+          </div>
+
+          <div class="table-scroll">
+            <table class="holdings-table">
+              <thead>
+                <tr>
+                  <th>市场</th>
+                  <th>账户</th>
+                  <th>标的</th>
+                  <th>名称</th>
+                  <th class="num">数量</th>
+                  <th class="num">成本</th>
+                  <th class="num">现价</th>
+                  <th class="num">市值</th>
+                  <th class="num">盈亏</th>
+                  <th class="num">盈亏比</th>
+                  <th class="num">优先级</th>
+                  <th>预警状态</th>
+                </tr>
+              </thead>
+              <tbody id="holdings-table-body"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="panel cash-panel">
+          <div class="panel-header">
+            <div>
+              <p class="panel-kicker">Cash</p>
+              <h3>现金账户</h3>
+            </div>
+            <div class="table-hint">当前版本仅展示 IBKR 现金</div>
+          </div>
+
+          <div class="table-scroll">
+            <table class="cash-table">
+              <thead>
+                <tr>
+                  <th>账户</th>
+                  <th>券商</th>
+                  <th>币种</th>
+                  <th class="num">现金余额</th>
+                </tr>
+              </thead>
+              <tbody id="cash-table-body"></tbody>
+            </table>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>
