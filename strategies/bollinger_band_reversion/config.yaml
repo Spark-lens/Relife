@@ -1,0 +1,82 @@
+strategy:
+  id: bollinger_band_reversion
+  mode: paper
+  symbols:
+    - QQQ
+    - QQQI
+    - BRK.B
+    - YANG
+    - SQQQ
+    - SOXS
+  timeframes:
+    - daily
+    - weekly
+    - monthly
+  buy:
+    enabled: true
+    percent_of_net_liquidation: 0.01
+    trigger: any_lower_band_breached
+    max_orders_per_symbol_per_day: 1
+  sell:
+    enabled: true
+    percent_of_position: 0.20
+    trigger: monthly_upper_band_break
+    max_orders_per_symbol_per_monthly_bar: 1
+  order:
+    type: limit
+    share_rounding: whole_share_floor
+    paper_fill_price: trigger_close
+  risk:
+    require_cash_available_without_margin: true
+    estimated_fee_per_order: 0
+    allow_margin_buying_power: false
+
+brokers:
+  priority:
+    - schwab
+    - ibkr
+  schwab:
+    adapter: static_paper
+    net_liquidation_env: RELIFE_SCHWAB_NET_LIQUIDATION
+    cash_available_without_margin_env: RELIFE_SCHWAB_CASH_AVAILABLE_WITHOUT_MARGIN
+    currency: USD
+    positions_env_prefix: RELIFE_POSITION_
+  ibkr:
+    adapter: reserved
+
+data_sources:
+  priority:
+    - alpha_vantage
+    - yfinance
+    - akshare
+  alpha_vantage:
+    api_key_env: ALPHA_VANTAGE_API_KEY
+    function: BBANDS
+    time_period: 20
+    nbdevup: 2
+    nbdevdn: 2
+    series_type: close
+  yfinance:
+    enabled_as_fallback: true
+  akshare:
+    enabled_as_a_share_fallback: true
+
+provider_symbol_map:
+  alpha_vantage:
+    QQQ: QQQ
+    QQQI: QQQI
+    BRK.B: BRK.B
+    YANG: YANG
+    SQQQ: SQQQ
+    SOXS: SOXS
+  yfinance:
+    QQQ: QQQ
+    QQQI: QQQI
+    BRK.B: BRK-B
+    YANG: YANG
+    SQQQ: SQQQ
+    SOXS: SOXS
+  akshare: {}
+
+storage:
+  sqlite_path: strategies/bollinger_band_reversion/state.sqlite
