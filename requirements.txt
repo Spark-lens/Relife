@@ -1,0 +1,9 @@
+# Core runtime dependencies for Relife strategy modules
+PyYAML
+requests
+
+# Optional market-data fallback providers used by
+# strategies/bollinger_band_reversion/providers.py
+pandas
+yfinance
+akshare
