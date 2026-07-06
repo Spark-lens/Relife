@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import json
 import re
 import sys
 from collections import Counter
@@ -30,16 +31,27 @@ BROKER_DIRS = {
     "ibkr": "ibkr",
     "yinhe": "yinhe",
 }
-SYMBOL_OVERRIDES = {
-    "QQQM": "NASDAQ:QQQM",
-    "GGLL": "NASDAQ:GGLL",
-    "SSPC": "CBOE:SSPC",
-}
 LATEST_PATTERN = re.compile(r"^tradingview_full_latest_(\d{4}-\d{2}-\d{2})\.csv$")
 SNAPSHOT_PATTERN = re.compile(r"^tradingview_full_(\d{4}-\d{2}-\d{2})\.csv$")
 LEGACY_PATTERN = re.compile(r"^tradingview_.*?(\d{4}-\d{2}-\d{2})\.csv$")
 GENERIC_DATE_PATTERN = re.compile(r"(20\d{2}-\d{2}-\d{2}|20\d{6})(?:-\d{6})?")
 DIVIDEND_ACTIONS = {"Cash Dividend", "Non-Qualified Div", "NRA Tax Adj"}
+
+
+class ChineseArgumentParser(argparse.ArgumentParser):
+    def __init__(self, *args: object, **kwargs: object) -> None:
+        kwargs.setdefault("add_help", False)
+        super().__init__(*args, **kwargs)
+        self._positionals.title = "位置参数"
+        self._optionals.title = "可选参数"
+        self.add_argument("-h", "--help", action="help", help="显示此帮助信息并退出")
+
+    def format_help(self) -> str:
+        text = super().format_help()
+        text = text.replace("usage:", "用法：", 1)
+        text = text.replace("options:", "可选参数：", 1)
+        text = text.replace("可选参数:\n", "可选参数：\n", 1)
+        return text
 
 
 @dataclass(frozen=True)
@@ -56,7 +68,7 @@ class NormalizedTransaction:
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="将券商交易流水增量同步为 TradingView 可导入的 CSV 文件。")
+    parser = ChineseArgumentParser(description="将券商交易流水增量同步为 TradingView 可导入的 CSV 文件。")
     parser.add_argument(
         "--broker",
         default=BROKER_DEFAULT,
@@ -72,6 +84,11 @@ def parse_args() -> argparse.Namespace:
         "--template-name",
         default="tradingview_template.csv",
         help="模板文件名，默认 tradingview_template.csv。",
+    )
+    parser.add_argument(
+        "--symbol-map-name",
+        default="symbol_map.json",
+        help="symbol 映射配置文件名，默认 symbol_map.json。",
     )
     parser.add_argument(
         "--transactions-dir",
@@ -101,7 +118,7 @@ def parse_args() -> argparse.Namespace:
 
 def ensure_headers(fieldnames: list[str] | None, expected: list[str], label: str) -> None:
     if fieldnames != expected:
-        raise ValueError(f"{label} headers mismatch: expected {expected}, got {fieldnames}")
+        raise ValueError(f"{label} 表头不匹配：期望 {expected}，实际为 {fieldnames}")
 
 
 def read_csv_rows(path: Path, expected_headers: list[str], label: str) -> list[dict[str, str]]:
@@ -117,6 +134,20 @@ def write_csv_rows(path: Path, rows: Iterable[dict[str, str]]) -> None:
         writer = csv.DictWriter(handle, fieldnames=TV_HEADERS)
         writer.writeheader()
         writer.writerows(rows)
+
+
+def load_symbol_overrides(path: Path) -> dict[str, str]:
+    with path.open("r", encoding="utf-8") as handle:
+        data = json.load(handle)
+    if not isinstance(data, dict):
+        raise ValueError(f"symbol_map 文件必须是 JSON 对象：{path}")
+
+    overrides: dict[str, str] = {}
+    for raw_symbol, tv_symbol in data.items():
+        if not isinstance(raw_symbol, str) or not isinstance(tv_symbol, str):
+            raise ValueError(f"symbol_map 的键和值都必须是字符串：{path}")
+        overrides[raw_symbol.strip()] = tv_symbol.strip()
+    return overrides
 
 
 def clean_number(value: str, *, default: str = "") -> str:
@@ -136,7 +167,7 @@ def normalize_number(value: str, *, default: str = "") -> str:
     try:
         dec = Decimal(cleaned)
     except InvalidOperation as exc:
-        raise ValueError(f"Invalid numeric value: {value!r}") from exc
+        raise ValueError(f"无效的数值字段：{value!r}") from exc
     return format(dec.normalize(), "f") if dec != dec.to_integral() else str(dec.quantize(Decimal("1")))
 
 
@@ -172,11 +203,11 @@ def resolve_transactions_path(root: Path, broker: str, supplied: str | None) -> 
         for candidate in candidates:
             if candidate.exists():
                 return candidate.resolve()
-        raise FileNotFoundError(f"Transactions file not found: {supplied}")
+        raise FileNotFoundError(f"未找到交易流水文件：{supplied}")
 
     csv_files = sorted((path for path in broker_dir.glob("*.csv")), key=transaction_sort_key, reverse=True)
     if not csv_files:
-        raise FileNotFoundError(f"No CSV files found in broker directory: {broker_dir}")
+        raise FileNotFoundError(f"券商目录下未找到 CSV 文件：{broker_dir}")
     return csv_files[0].resolve()
 
 
@@ -209,7 +240,7 @@ def resolve_current_full_path(tradingview_dir: Path) -> Path:
     if legacy_candidates:
         return legacy_candidates[-1][1].resolve()
 
-    raise FileNotFoundError(f"Unable to find current full TradingView file in {tradingview_dir}.")
+    raise FileNotFoundError(f"无法在 {tradingview_dir} 中找到当前 TradingView 全量文件。")
 
 
 def collect_dated_files(
@@ -230,13 +261,13 @@ def collect_dated_files(
     return matches
 
 
-def build_symbol_map(current_rows: list[dict[str, str]]) -> dict[str, str]:
+def build_symbol_map(current_rows: list[dict[str, str]], symbol_overrides: dict[str, str]) -> dict[str, str]:
     symbol_map: dict[str, str] = {}
     for row in current_rows:
         symbol = row["Symbol"]
         bare = symbol.split(":", 1)[-1]
         symbol_map.setdefault(bare, symbol)
-    symbol_map.update({k: v for k, v in SYMBOL_OVERRIDES.items() if k not in symbol_map})
+    symbol_map.update({k: v for k, v in symbol_overrides.items() if k not in symbol_map})
     return symbol_map
 
 
@@ -260,12 +291,12 @@ def convert_transaction(
     if tx.action == "Journal":
         return None, "journal"
     if tx.symbol_raw not in symbol_map:
-        raise ValueError(f"Unknown TradingView symbol mapping for {tx.symbol_raw}. Update SYMBOL_OVERRIDES.")
+        raise ValueError(f"未知的 TradingView 标的映射：{tx.symbol_raw}。请更新 symbol_map.json。")
 
     symbol = symbol_map[tx.symbol_raw]
     if tx.action in {"Buy", "Sell"}:
         if not tx.quantity or not tx.price:
-            raise ValueError(f"Missing quantity or price for trade: {tx}")
+            raise ValueError(f"交易记录缺少数量或价格：{tx}")
         return {
             "Symbol": symbol,
             "Side": tx.action,
@@ -276,7 +307,7 @@ def convert_transaction(
         }, None
     if tx.action in DIVIDEND_ACTIONS:
         if not tx.amount:
-            raise ValueError(f"Missing amount for dividend action: {tx}")
+            raise ValueError(f"分红记录缺少金额：{tx}")
         return {
             "Symbol": symbol,
             "Side": "Dividend",
@@ -286,7 +317,7 @@ def convert_transaction(
             "Closing Time": format_tv_datetime(tx.trade_date),
         }, None
 
-    raise ValueError(f"Unsupported transaction action: {tx.action}")
+    raise ValueError(f"暂不支持的交易动作：{tx.action}")
 
 
 def previous_month_end(today: date) -> date:
@@ -324,18 +355,22 @@ def main() -> int:
 
     template_path = (template_dir / args.template_name).resolve()
     if not template_path.exists():
-        raise FileNotFoundError(f"Template file not found: {template_path}")
+        raise FileNotFoundError(f"未找到模板文件：{template_path}")
+    symbol_map_path = (template_dir / args.symbol_map_name).resolve()
+    if not symbol_map_path.exists():
+        raise FileNotFoundError(f"未找到 symbol_map 配置文件：{symbol_map_path}")
 
     transactions_path = resolve_transactions_path(transactions_dir, args.broker, args.transactions)
     current_full_path = resolve_current_full_path(tradingview_dir)
 
     _ = read_csv_rows(template_path, TV_HEADERS, "TradingView template")
+    symbol_overrides = load_symbol_overrides(symbol_map_path)
     current_rows = read_csv_rows(current_full_path, TV_HEADERS, "Current TradingView full file")
     schwab_rows = read_csv_rows(transactions_path, SCHWAB_HEADERS, "Charles Schwab transactions")
 
     current_max_dt = max(parse_tv_datetime(row["Closing Time"]) for row in current_rows)
     cutoff = current_max_dt.date()
-    symbol_map = build_symbol_map(current_rows)
+    symbol_map = build_symbol_map(current_rows, symbol_overrides)
 
     normalized_txs = [parse_schwab_row(row, args.broker) for row in schwab_rows]
     candidate_txs = [tx for tx in normalized_txs if tx.trade_date > cutoff]
@@ -394,23 +429,24 @@ def main() -> int:
             if month_snapshot_path.exists():
                 prune_old_files(output_dir, month_snapshot_path, lambda name: bool(SNAPSHOT_PATTERN.match(name)))
 
-    print("TradingView sync summary")
-    print(f"- Broker: {args.broker}")
-    print(f"- Template: {template_path}")
-    print(f"- Transactions: {transactions_path}")
-    print(f"- Current full: {current_full_path}")
-    print(f"- Cutoff date: {cutoff.isoformat()}")
-    print(f"- Source rows: {len(normalized_txs)}")
-    print(f"- Candidate rows after cutoff: {len(candidate_txs)}")
-    print(f"- Added rows: {len(added_rows)}")
-    print(f"- Skipped journal rows: {skipped_journal}")
-    print(f"- Skipped already-existing rows: {skipped_existing}")
+    print("TradingView 同步摘要")
+    print(f"- 券商：{args.broker}")
+    print(f"- 模板文件：{template_path}")
+    print(f"- Symbol 映射：{symbol_map_path}")
+    print(f"- 交易流水：{transactions_path}")
+    print(f"- 当前全量文件：{current_full_path}")
+    print(f"- 截止日期：{cutoff.isoformat()}")
+    print(f"- 原始记录数：{len(normalized_txs)}")
+    print(f"- 截止日期后的候选记录数：{len(candidate_txs)}")
+    print(f"- 新增记录数：{len(added_rows)}")
+    print(f"- 跳过的 Journal 记录数：{skipped_journal}")
+    print(f"- 跳过的已存在记录数：{skipped_existing}")
     if written_files:
-        print("- Written files:")
+        print("- 已写入文件：")
         for path in written_files:
             print(f"  - {path}")
     else:
-        print("- Written files: none")
+        print("- 已写入文件：无")
     return 0
 
 
@@ -418,5 +454,5 @@ if __name__ == "__main__":
     try:
         raise SystemExit(main())
     except Exception as exc:  # pragma: no cover
-        print(f"Error: {exc}", file=sys.stderr)
+        print(f"错误：{exc}", file=sys.stderr)
         raise SystemExit(1)

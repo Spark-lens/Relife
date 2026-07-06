@@ -12,7 +12,17 @@
 | --- | --- |
 | 输入 | `data/transactions/charles_schwab/` 下的嘉信交易流水 CSV，默认使用最新文件 |
 | 输出 | `data/tradingview/` 下的 TradingView CSV |
+| Symbol 映射 | `data/templates/tradingview/symbol_map.json` |
 | 命令 | `python3 scripts/tradingview_sync.py` |
+
+新增标的时，如果脚本提示缺少 TradingView symbol mapping，请直接在 `data/templates/tradingview/symbol_map.json` 中追加：
+
+```json
+{
+  "NOK": "NYSE:NOK",
+  "CAMT": "NASDAQ:CAMT"
+}
+```
 
 ## 证券账户
 

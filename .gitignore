@@ -8,6 +8,11 @@ env/
 venv/
 .env
 .venv
+.tests/
+
+# agent
+.agents/
+.codex/
 
 # IDE
 .vscode/
