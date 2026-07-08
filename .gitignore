@@ -15,8 +15,7 @@ venv/
 .codex/
 
 # IDE
-.vscode/
-.idea/
+# .vscode/
 
 # 其他
 *.log

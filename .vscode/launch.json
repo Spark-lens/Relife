@@ -1,0 +1,41 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      // TradingView 增量同步脚本
+      "name": "Python: TradingView Sync (Example Args)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/tradingview_sync.py",
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "justMyCode": true,
+      "args": [
+        // "--broker",
+        // "charles_schwab",
+        // "--template-dir",
+        // "data/templates/tradingview",
+        // "--template-name",
+        // "tradingview_template.csv",
+        // "--transactions-dir",
+        // "data/transactions",
+        "--transactions",
+        "Individual_XXX389_Transactions_20260707-215734.csv",
+        // "--tradingview-dir",
+        // "data/tradingview",
+        // "--output-dir",
+        // "data/tradingview"
+      ]
+    },
+    {
+      // 运行当前正在编辑的 Python 文件。
+      "name": "Python: Current File",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${file}",
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "justMyCode": true
+    }
+  ]
+}

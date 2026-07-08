@@ -114,7 +114,7 @@ CLI 参数：
   - `QQQM -> NASDAQ:QQQM`
   - `GGLL -> NASDAQ:GGLL`
   - `SSPC -> CBOE:SSPC`
-- 未知 symbol 直接报错，并提示补映射
+- 未知 symbol 默认按配置的交易所前缀自动补充到 `symbol_map.json`，默认前缀为 `NASDAQ`
 
 ## 全量文件维护
 默认自动维护：
@@ -148,7 +148,7 @@ CLI 参数：
 7. 有新增时自动更新 `tradingview_full_latest_<date>.csv`
 8. 缺少上一月月末快照时自动补建 `tradingview_full_2026-05-31.csv`
 9. 同一交易文件重复执行时不重复追加
-10. 模板表头错误、未知 symbol、未知交易类型时明确报错
+10. 模板表头错误、未知交易类型时明确报错；未知 symbol 会自动补充映射
 
 ## Assumptions
 - 当前这版只实现嘉信，但入口默认值与目录结构按多券商扩展设计

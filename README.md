@@ -15,7 +15,7 @@
 | Symbol 映射 | `data/templates/tradingview/symbol_map.json` |
 | 命令 | `python3 scripts/tradingview_sync.py` |
 
-新增标的时，如果脚本提示缺少 TradingView symbol mapping，请直接在 `data/templates/tradingview/symbol_map.json` 中追加：
+新增标的时，脚本会默认按 `NASDAQ:<标的>` 自动补充到 `data/templates/tradingview/symbol_map.json`。如果实际交易所不是 NASDAQ，请在运行后手动调整对应值，例如：
 
 ```json
 {

@@ -12,7 +12,7 @@ from dataclasses import dataclass
 from datetime import date, datetime, timedelta
 from decimal import Decimal, InvalidOperation
 from pathlib import Path
-from typing import Callable, Iterable
+from typing import Any, Callable, Iterable
 
 TV_HEADERS = ["Symbol", "Side", "Qty", "Fill Price", "Commission", "Closing Time"]
 SCHWAB_HEADERS = [
@@ -26,6 +26,7 @@ SCHWAB_HEADERS = [
     "Amount",
 ]
 BROKER_DEFAULT = "charles_schwab"
+DEFAULT_UNKNOWN_SYMBOL_EXCHANGE = "NASDAQ"
 BROKER_DIRS = {
     "charles_schwab": "charles_schwab",
     "ibkr": "ibkr",
@@ -39,11 +40,15 @@ DIVIDEND_ACTIONS = {"Cash Dividend", "Non-Qualified Div", "NRA Tax Adj"}
 
 
 class ChineseArgumentParser(argparse.ArgumentParser):
-    def __init__(self, *args: object, **kwargs: object) -> None:
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         kwargs.setdefault("add_help", False)
         super().__init__(*args, **kwargs)
-        self._positionals.title = "位置参数"
-        self._optionals.title = "可选参数"
+        positionals = getattr(self, "_positionals", None)
+        optionals = getattr(self, "_optionals", None)
+        if positionals is not None:
+            positionals.title = "位置参数"
+        if optionals is not None:
+            optionals.title = "可选参数"
         self.add_argument("-h", "--help", action="help", help="显示此帮助信息并退出")
 
     def format_help(self) -> str:
@@ -89,6 +94,11 @@ def parse_args() -> argparse.Namespace:
         "--symbol-map-name",
         default="symbol_map.json",
         help="symbol 映射配置文件名，默认 symbol_map.json。",
+    )
+    parser.add_argument(
+        "--unknown-symbol-exchange",
+        default=DEFAULT_UNKNOWN_SYMBOL_EXCHANGE,
+        help=f"自动补新标的映射时使用的 TradingView 交易所前缀，默认 {DEFAULT_UNKNOWN_SYMBOL_EXCHANGE}。",
     )
     parser.add_argument(
         "--transactions-dir",
@@ -148,6 +158,13 @@ def load_symbol_overrides(path: Path) -> dict[str, str]:
             raise ValueError(f"symbol_map 的键和值都必须是字符串：{path}")
         overrides[raw_symbol.strip()] = tv_symbol.strip()
     return overrides
+
+
+def write_symbol_overrides(path: Path, overrides: dict[str, str]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("w", encoding="utf-8") as handle:
+        json.dump(dict(sorted(overrides.items())), handle, ensure_ascii=False, indent=2)
+        handle.write("\n")
 
 
 def clean_number(value: str, *, default: str = "") -> str:
@@ -267,8 +284,41 @@ def build_symbol_map(current_rows: list[dict[str, str]], symbol_overrides: dict[
         symbol = row["Symbol"]
         bare = symbol.split(":", 1)[-1]
         symbol_map.setdefault(bare, symbol)
-    symbol_map.update({k: v for k, v in symbol_overrides.items() if k not in symbol_map})
+    symbol_map.update(symbol_overrides)
     return symbol_map
+
+
+def infer_tradingview_symbol(raw_symbol: str, default_exchange: str) -> str:
+    symbol = raw_symbol.strip()
+    exchange = default_exchange.strip().upper()
+    if not symbol:
+        raise ValueError("无法为空标的自动生成 TradingView 映射。")
+    if ":" in symbol or not exchange:
+        return symbol
+    return f"{exchange}:{symbol}"
+
+
+def ensure_symbol_map_for_transactions(
+    current_rows: list[dict[str, str]],
+    symbol_overrides: dict[str, str],
+    symbol_map_path: Path,
+    transactions: Iterable[NormalizedTransaction],
+    *,
+    default_exchange: str,
+) -> tuple[dict[str, str], dict[str, str]]:
+    symbol_map = build_symbol_map(current_rows, symbol_overrides)
+    additions: dict[str, str] = {}
+    for tx in transactions:
+        if tx.action == "Journal" or not tx.symbol_raw or tx.symbol_raw in symbol_map:
+            continue
+        tv_symbol = infer_tradingview_symbol(tx.symbol_raw, default_exchange)
+        symbol_map[tx.symbol_raw] = tv_symbol
+        additions[tx.symbol_raw] = tv_symbol
+
+    if additions:
+        write_symbol_overrides(symbol_map_path, {**symbol_overrides, **additions})
+
+    return symbol_map, additions
 
 
 def tv_row_key(row: dict[str, str]) -> tuple[str, str, str, str, str, str]:
@@ -370,10 +420,15 @@ def main() -> int:
 
     current_max_dt = max(parse_tv_datetime(row["Closing Time"]) for row in current_rows)
     cutoff = current_max_dt.date()
-    symbol_map = build_symbol_map(current_rows, symbol_overrides)
-
     normalized_txs = [parse_schwab_row(row, args.broker) for row in schwab_rows]
     candidate_txs = [tx for tx in normalized_txs if tx.trade_date > cutoff]
+    symbol_map, added_symbol_mappings = ensure_symbol_map_for_transactions(
+        current_rows,
+        symbol_overrides,
+        symbol_map_path,
+        candidate_txs,
+        default_exchange=args.unknown_symbol_exchange,
+    )
 
     existing_counts = Counter(tv_row_key(row) for row in current_rows)
     added_rows: list[dict[str, str]] = []
@@ -441,6 +496,12 @@ def main() -> int:
     print(f"- 新增记录数：{len(added_rows)}")
     print(f"- 跳过的 Journal 记录数：{skipped_journal}")
     print(f"- 跳过的已存在记录数：{skipped_existing}")
+    if added_symbol_mappings:
+        print("- 自动补充的 Symbol 映射：")
+        for raw_symbol, tv_symbol in sorted(added_symbol_mappings.items()):
+            print(f"  - {raw_symbol}: {tv_symbol}")
+    else:
+        print("- 自动补充的 Symbol 映射：无")
     if written_files:
         print("- 已写入文件：")
         for path in written_files:
