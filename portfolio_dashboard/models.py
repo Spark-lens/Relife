@@ -33,4 +33,4 @@ class Transaction:
     external_cash_flow: Decimal
     source_id: str
     raw_action: str
-
+    cash_balance: Decimal | None = None

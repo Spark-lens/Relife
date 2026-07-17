@@ -29,6 +29,7 @@ class YinheParserTest(unittest.TestCase):
 
         self.assertEqual([0, 1, 2], [row.source_index for row in same_day])
         self.assertEqual(["sell", "sell", "sell"], [row.kind for row in same_day])
+        self.assertEqual(Decimal("3749.160"), same_day[0].cash_balance)
 
     def test_normalizes_cash_dividend_and_reverse_repo_actions(self) -> None:
         rows = parse_yinhe(FIXTURES / "yinhe.csv")

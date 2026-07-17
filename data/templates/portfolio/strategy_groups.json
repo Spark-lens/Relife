@@ -1,0 +1,64 @@
+{
+  "groups": [
+    {
+      "id": "cashflow",
+      "label": "现金流",
+      "members": {
+        "$CASH": "现金",
+        "BOXX": "短债"
+      }
+    },
+    {
+      "id": "broad-market",
+      "label": "大盘",
+      "members": {
+        "QQQ": "美股",
+        "512100": "A 股"
+      }
+    },
+    {
+      "id": "dividend",
+      "label": "股息",
+      "members": {
+        "XQQI": "期权股息",
+        "QQQI": "期权股息",
+        "SCHD": "红利股息",
+        "513530": "红利股息"
+      }
+    },
+    {
+      "id": "stock",
+      "label": "个股",
+      "members": {
+        "BRK.B": "防御",
+        "KO": "防御",
+        "GOOGL": "进攻",
+        "JD": "进攻"
+      }
+    },
+    {
+      "id": "leverage",
+      "label": "杠杆",
+      "members": {
+        "SOXL": "半导体",
+        "SOXS": "半导体",
+        "YINN": "中国",
+        "YANG": "中国",
+        "TQQQ": "纳指",
+        "SQQQ": "纳指"
+      }
+    },
+    {
+      "id": "bitcoin",
+      "label": "比特币",
+      "members": {
+        "IBIT": "独立核算"
+      }
+    }
+  ],
+  "fallback": {
+    "id": "other",
+    "label": "其他",
+    "badge": "策略外"
+  }
+}

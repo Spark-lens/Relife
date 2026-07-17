@@ -133,6 +133,7 @@ def parse_tradingview(path: Path) -> list[Transaction]:
                 external_cash_flow=external_cash_flow,
                 source_id=f"us:{_fingerprint(row)}",
                 raw_action=side,
+                cash_balance=None,
             )
         )
     return parsed
@@ -203,6 +204,9 @@ def parse_yinhe(path: Path) -> list[Transaction]:
                 external_cash_flow=external_cash_flow,
                 source_id=source_id,
                 raw_action=action,
+                cash_balance=_decimal(
+                    row["资金余额"], field="资金余额", row_number=row_number
+                ),
             )
         )
     return parsed
