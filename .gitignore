@@ -10,6 +10,13 @@ venv/
 .venv
 .tests/
 
+# Node / Sites
+node_modules/
+.next/
+.vinext/
+.wrangler/
+dist/
+
 # agent
 .agents/
 .codex/
