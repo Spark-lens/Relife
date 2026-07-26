@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 from collections import defaultdict
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import date, datetime
 from decimal import Decimal
 from pathlib import Path
@@ -71,6 +71,7 @@ def build_performance(
     index_value = Decimal("100")
     for value_day, total_assets in normalized:
         if total_assets <= 0:
+            previous_value = None
             continue
         if previous_value is None:
             result.append((value_day, index_value))
@@ -142,6 +143,32 @@ def _transaction_symbols(transactions: list[Any]) -> list[str]:
             if transaction.kind in {"buy", "sell"} and transaction.symbol
         }
     )
+
+
+def _adjust_transactions_for_splits(
+    transactions: list[Any],
+    splits: Mapping[str, Mapping[date, Decimal]],
+) -> list[Any]:
+    adjusted: list[Any] = []
+    for transaction in transactions:
+        if transaction.kind not in {"buy", "sell"}:
+            adjusted.append(transaction)
+            continue
+        factor = Decimal("1")
+        for split_day, ratio in splits.get(transaction.symbol, {}).items():
+            if split_day > transaction.timestamp.date():
+                factor *= ratio
+        if factor == 1:
+            adjusted.append(transaction)
+            continue
+        adjusted.append(
+            replace(
+                transaction,
+                quantity=transaction.quantity * factor,
+                price=transaction.price / factor,
+            )
+        )
+    return adjusted
 
 
 def _serialize_transactions(transactions: list[Any]) -> list[dict[str, Any]]:
@@ -272,7 +299,11 @@ def _build_market(
     requested = symbols + [item["id"] for item in benchmark_config]
     start = min(transaction.timestamp.date() for transaction in transactions)
     prices = provider.history(requested, start, generated_at.date())
-    ledger = replay_ledger(transactions, prices)
+    ledger_transactions = _adjust_transactions_for_splits(
+        transactions,
+        getattr(provider, "splits", {}),
+    )
+    ledger = replay_ledger(ledger_transactions, prices)
 
     missing_current = [
         symbol
@@ -393,4 +424,3 @@ def generate_dashboard(
         temporary.unlink(missing_ok=True)
         raise
     return payload
-

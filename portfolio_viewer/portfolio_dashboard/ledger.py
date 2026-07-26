@@ -10,6 +10,14 @@ from .models import Transaction
 
 
 PriceMatrix = Mapping[str, Mapping[date, Decimal]]
+REPO_OPEN_ACTIONS = {
+    "报价融券回购",
+    "通用回购逆回购",
+}
+REPO_CLOSE_ACTIONS = {
+    "报价融券购回",
+    "通用回购逆回购购",
+}
 
 
 @dataclass
@@ -219,6 +227,7 @@ def replay_ledger(
         all_days.update(series)
 
     states: dict[str, PositionState] = {}
+    repo_principal: dict[str, Decimal] = defaultdict(Decimal)
     cash = Decimal("0")
     daily_values: list[DailyValue] = []
     external_flows: dict[date, Decimal] = defaultdict(Decimal)
@@ -229,6 +238,14 @@ def replay_ledger(
             cash += transaction.cash_delta
             external_flows[day] += transaction.external_cash_flow
             _update_position(states, transaction)
+            if transaction.raw_action in REPO_OPEN_ACTIONS:
+                repo_principal[transaction.symbol] += -transaction.cash_delta
+            elif transaction.raw_action in REPO_CLOSE_ACTIONS:
+                redeemed_principal = min(
+                    repo_principal[transaction.symbol],
+                    transaction.cash_delta,
+                )
+                repo_principal[transaction.symbol] -= redeemed_principal
 
         authoritative = [
             transaction
@@ -238,7 +255,9 @@ def replay_ledger(
         if authoritative:
             cash = min(
                 authoritative,
-                key=lambda item: item.source_index,
+                key=lambda item: abs(
+                    (item.cash_balance or Decimal("0")) - cash
+                ),
             ).cash_balance or Decimal("0")
 
         securities_value = Decimal("0")
@@ -251,7 +270,11 @@ def replay_ledger(
         daily_values.append(
             DailyValue(
                 day=day,
-                total_assets=cash + securities_value,
+                total_assets=(
+                    cash
+                    + securities_value
+                    + sum(repo_principal.values(), Decimal("0"))
+                ),
                 cash=cash,
             )
         )
@@ -280,4 +303,3 @@ def replay_ledger(
         external_flows=dict(external_flows),
         transactions=list(transactions),
     )
-

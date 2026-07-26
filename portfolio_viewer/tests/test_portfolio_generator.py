@@ -8,9 +8,11 @@ from pathlib import Path
 from portfolio_dashboard.generator import (
     MissingPriceError,
     ProviderBundle,
+    _adjust_transactions_for_splits,
     build_performance,
     generate_dashboard,
 )
+from portfolio_dashboard.models import Transaction
 
 
 FIXTURES = Path(__file__).parent / "fixtures" / "portfolio"
@@ -78,6 +80,32 @@ def providers(*, omit_qqqi: bool = False) -> ProviderBundle:
 
 
 class PerformanceTest(unittest.TestCase):
+    def test_split_adjustment_converts_trades_to_current_share_basis(self) -> None:
+        original = Transaction(
+            market="us",
+            timestamp=datetime.fromisoformat("2026-06-18T00:00:00"),
+            source_index=0,
+            symbol="SOXS",
+            name="SOXS",
+            kind="buy",
+            quantity=Decimal("4"),
+            price=Decimal("3.50"),
+            fee=Decimal("0"),
+            cash_delta=Decimal("-14"),
+            external_cash_flow=Decimal("0"),
+            source_id="split-test",
+            raw_action="Buy",
+        )
+
+        adjusted = _adjust_transactions_for_splits(
+            [original],
+            {"SOXS": {date(2026, 7, 15): Decimal("0.1")}},
+        )
+
+        self.assertEqual(Decimal("0.4"), adjusted[0].quantity)
+        self.assertEqual(Decimal("35.0"), adjusted[0].price)
+        self.assertEqual(Decimal("-14"), adjusted[0].cash_delta)
+
     def test_twr_removes_external_deposit(self) -> None:
         points = build_performance(
             values=[
@@ -89,6 +117,29 @@ class PerformanceTest(unittest.TestCase):
 
         self.assertEqual(Decimal("100"), points[0][1])
         self.assertEqual(Decimal("110.0"), points[-1][1])
+
+    def test_full_withdrawal_then_new_deposit_restarts_measurement_period(self) -> None:
+        points = build_performance(
+            values=[
+                (date(2026, 1, 1), Decimal("100")),
+                (date(2026, 1, 2), Decimal("0")),
+                (date(2026, 2, 1), Decimal("200")),
+                (date(2026, 2, 2), Decimal("210")),
+            ],
+            external_flows={
+                date(2026, 1, 2): Decimal("-100"),
+                date(2026, 2, 1): Decimal("200"),
+            },
+        )
+
+        self.assertEqual(
+            [
+                (date(2026, 1, 1), Decimal("100")),
+                (date(2026, 2, 1), Decimal("100")),
+                (date(2026, 2, 2), Decimal("105.00")),
+            ],
+            points,
+        )
 
 
 class GeneratorTest(unittest.TestCase):

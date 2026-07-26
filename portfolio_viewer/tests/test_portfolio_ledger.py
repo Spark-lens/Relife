@@ -31,6 +31,9 @@ def tx(
     fee: str = "0",
     cash_delta: str | None = None,
     source_index: int = 0,
+    market: str = "us",
+    raw_action: str | None = None,
+    cash_balance: str | None = None,
 ) -> Transaction:
     qty = Decimal(quantity)
     fill = Decimal(price)
@@ -45,7 +48,7 @@ def tx(
     else:
         cash = Decimal(cash_delta)
     return Transaction(
-        market="us",
+        market=market,  # type: ignore[arg-type]
         timestamp=datetime.fromisoformat(f"{day}T00:00:00"),
         source_index=source_index,
         symbol=symbol,
@@ -57,11 +60,87 @@ def tx(
         cash_delta=cash,
         external_cash_flow=cash if kind in {"deposit", "withdrawal"} else Decimal("0"),
         source_id=f"{day}:{source_index}:{kind}",
-        raw_action=kind,
+        raw_action=raw_action or kind,
+        cash_balance=(
+            None if cash_balance is None else Decimal(cash_balance)
+        ),
     )
 
 
 class LedgerTest(unittest.TestCase):
+    def test_chooses_same_day_cash_balance_that_matches_all_cash_deltas(self) -> None:
+        result = replay_ledger(
+            [
+                tx(
+                    "deposit",
+                    day="2026-01-01",
+                    cash_delta="100",
+                    market="cn",
+                    cash_balance="100",
+                ),
+                tx(
+                    "interest",
+                    day="2026-01-02",
+                    cash_delta="20",
+                    market="cn",
+                    cash_balance="120",
+                    source_index=0,
+                ),
+                tx(
+                    "deposit",
+                    day="2026-01-02",
+                    cash_delta="50",
+                    market="cn",
+                    cash_balance="170",
+                    source_index=1,
+                ),
+            ],
+            closes={},
+        )
+
+        self.assertEqual(Decimal("170"), result.cash)
+
+    def test_reverse_repo_principal_remains_in_total_assets_until_redemption(self) -> None:
+        result = replay_ledger(
+            [
+                tx(
+                    "deposit",
+                    day="2026-01-01",
+                    cash_delta="30000",
+                    market="cn",
+                    cash_balance="30000",
+                ),
+                tx(
+                    "cash",
+                    day="2026-01-02",
+                    symbol="132001",
+                    cash_delta="-30000",
+                    market="cn",
+                    raw_action="报价融券回购",
+                    cash_balance="0",
+                ),
+                tx(
+                    "cash",
+                    day="2026-01-03",
+                    symbol="132001",
+                    cash_delta="30188.25",
+                    market="cn",
+                    raw_action="报价融券购回",
+                    cash_balance="30188.25",
+                ),
+            ],
+            closes={},
+        )
+
+        self.assertEqual(
+            [
+                Decimal("30000"),
+                Decimal("30000"),
+                Decimal("30188.25"),
+            ],
+            [item.total_assets for item in result.daily_values],
+        )
+
     def test_partial_sell_uses_weighted_average_and_net_proceeds(self) -> None:
         result = replay_ledger(
             [

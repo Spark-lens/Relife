@@ -4,6 +4,35 @@
 
 ## 当前功能
 
+### 私有投资组合仪表盘
+
+仪表盘从最新美股 TradingView 全量文件和最新银河证券交割单生成，A 股与美股独立核算，不做汇率换算。页面包括组合总览、策略分组持仓、倒序交易记录和股息分析，并以最后收盘价对比市场基准。
+
+| 市场 | 基准 | 行情源 |
+| --- | --- | --- |
+| A 股 | 上证指数、沪深 300 | AkShare |
+| 美股 | QQQ、SPY | Yahoo Finance |
+
+更新数据、构建并启动看板：
+
+```bash
+./scripts/run_portfolio_viewer.sh
+```
+
+刷新交易数据、联网获取行情并构建站点：
+
+```bash
+npm --prefix portfolio_viewer run portfolio:update
+```
+
+只重新生成 `portfolio_viewer/public/data/portfolio.json`：
+
+```bash
+npm --prefix portfolio_viewer run portfolio:data
+```
+
+Python 使用 `/home/clannad/miniforge3/envs/istorm_rag_gpu`。行情查询仅向服务商发送标的代码和日期范围，不发送持仓数量、成本、账户余额或原始交易文件。账本会按行情源的拆并股事件换算到当前股本口径，交易记录仍展示原始成交数量与价格。持仓列的显示与顺序保存在当前设备浏览器中。
+
 ### 嘉信交易流水同步 TradingView
 
 读取嘉信 Charles Schwab 原始交易流水 CSV，生成 TradingView 可导入交易记录，并同步维护增量文件、最新全量文件和月末快照。

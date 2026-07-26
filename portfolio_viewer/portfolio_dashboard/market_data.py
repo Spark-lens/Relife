@@ -20,11 +20,53 @@ def _decimal_close(value: object) -> Decimal:
     return Decimal(str(value))
 
 
+def _repair_price_discontinuities(
+    series: dict[date, Decimal],
+) -> dict[date, Decimal]:
+    repaired = dict(series)
+    candidates = [
+        Decimal("5"),
+        Decimal("10"),
+        Decimal("20"),
+        Decimal("25"),
+        Decimal("50"),
+        Decimal("100"),
+        Decimal("200"),
+    ]
+    ordered_days = sorted(repaired)
+    for index in range(1, len(ordered_days)):
+        previous_day = ordered_days[index - 1]
+        current_day = ordered_days[index]
+        previous = repaired[previous_day]
+        current = repaired[current_day]
+        if previous <= 0 or current <= 0:
+            continue
+        ratio = max(previous, current) / min(previous, current)
+        candidate = min(
+            candidates,
+            key=lambda value: abs(float(ratio / value) - 1),
+        )
+        if abs(float(ratio / candidate) - 1) > 0.35:
+            continue
+        scale = (
+            Decimal("1") / candidate
+            if previous > current
+            else candidate
+        )
+        for earlier_day in ordered_days[:index]:
+            repaired[earlier_day] *= scale
+    return repaired
+
+
 class YahooPriceProvider:
     SYMBOL_MAP = {
+        "BRKB": "BRK-B",
         "__QQQ__": "QQQ",
         "__SPY__": "SPY",
     }
+
+    def __init__(self) -> None:
+        self.splits: dict[str, dict[date, Decimal]] = {}
 
     def history(
         self,
@@ -46,7 +88,7 @@ class YahooPriceProvider:
                 start=start.isoformat(),
                 end=(end + timedelta(days=1)).isoformat(),
                 auto_adjust=False,
-                actions=False,
+                actions=True,
             )
             series: dict[date, Decimal] = {}
             if not frame.empty and "Close" in frame:
@@ -54,7 +96,15 @@ class YahooPriceProvider:
                     price_day = timestamp.date()
                     if start <= price_day <= end:
                         series[price_day] = _decimal_close(value)
-            result[symbol] = series
+            result[symbol] = _repair_price_discontinuities(series)
+            split_series: dict[date, Decimal] = {}
+            if not frame.empty and "Stock Splits" in frame:
+                for timestamp, value in frame["Stock Splits"].dropna().items():
+                    ratio = _decimal_close(value)
+                    split_day = timestamp.date()
+                    if ratio > 0 and ratio != 1 and start <= split_day <= end:
+                        split_series[split_day] = ratio
+            self.splits[symbol] = split_series
         return result
 
 
@@ -63,6 +113,11 @@ class AksharePriceProvider:
         "__SSE__": "sh000001",
         "__CSI300__": "sh000300",
     }
+
+    @staticmethod
+    def _exchange_symbol(symbol: str) -> str:
+        exchange = "sh" if symbol.startswith(("5", "6", "9")) else "sz"
+        return f"{exchange}{symbol}"
 
     def history(
         self,
@@ -81,26 +136,13 @@ class AksharePriceProvider:
         for symbol in symbols:
             if symbol in self.INDEX_MAP:
                 frame = ak.stock_zh_index_daily(symbol=self.INDEX_MAP[symbol])
-            elif symbol.startswith(("15", "51", "56", "58")):
-                frame = ak.fund_etf_hist_em(
-                    symbol=symbol,
-                    period="daily",
-                    start_date=start.strftime("%Y%m%d"),
-                    end_date=end.strftime("%Y%m%d"),
-                    adjust="",
-                )
-            elif symbol.startswith("16"):
-                frame = ak.fund_lof_hist_em(
-                    symbol=symbol,
-                    period="daily",
-                    start_date=start.strftime("%Y%m%d"),
-                    end_date=end.strftime("%Y%m%d"),
-                    adjust="",
+            elif symbol.startswith(("15", "16", "51", "56", "58")):
+                frame = ak.fund_etf_hist_sina(
+                    symbol=self._exchange_symbol(symbol),
                 )
             else:
-                frame = ak.stock_zh_a_hist(
-                    symbol=symbol,
-                    period="daily",
+                frame = ak.stock_zh_a_daily(
+                    symbol=self._exchange_symbol(symbol),
                     start_date=start.strftime("%Y%m%d"),
                     end_date=end.strftime("%Y%m%d"),
                     adjust="",
@@ -119,4 +161,3 @@ class AksharePriceProvider:
                         series[price_day] = _decimal_close(raw_close)
             result[symbol] = series
         return result
-

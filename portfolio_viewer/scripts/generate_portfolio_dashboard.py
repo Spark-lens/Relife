@@ -9,9 +9,10 @@ from pathlib import Path
 from zoneinfo import ZoneInfo
 
 
-ROOT = Path(__file__).resolve().parents[1]
-if str(ROOT) not in sys.path:
-    sys.path.insert(0, str(ROOT))
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+REPOSITORY_ROOT = PROJECT_ROOT.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
 
 from portfolio_dashboard.generator import ProviderBundle, generate_dashboard
 from portfolio_dashboard.market_data import AksharePriceProvider, YahooPriceProvider
@@ -36,15 +37,15 @@ def main() -> int:
     args = parse_args()
     us_path = args.us_transactions or latest_source(
         "tradingview_full_latest_*.csv",
-        ROOT / "data" / "tradingview",
+        REPOSITORY_ROOT / "data" / "tradingview",
     )
     cn_path = args.cn_transactions or latest_source(
         "交割单_*.csv",
-        ROOT / "data" / "transactions" / "yinhe",
+        REPOSITORY_ROOT / "data" / "transactions" / "yinhe",
     )
     output_path = args.output
     if not output_path.is_absolute():
-        output_path = ROOT / output_path
+        output_path = PROJECT_ROOT / output_path
 
     payload = generate_dashboard(
         us_path=us_path,
@@ -67,4 +68,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-
