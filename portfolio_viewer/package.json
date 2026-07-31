@@ -3,7 +3,7 @@
   "displayName": "Relife Portfolio",
   "description": "在 VS Code 中查看并定时更新 Relife 仓库的 A 股与美股投资组合。",
   "version": "0.1.0",
-  "publisher": "relife",
+  "publisher": "clannad0710",
   "private": true,
   "license": "Apache-2.0",
   "icon": "media/icon.png",

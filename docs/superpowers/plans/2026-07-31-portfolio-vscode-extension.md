@@ -94,7 +94,7 @@
 - Modify: `README.md`
 
 **Interfaces:**
-- Produces: Marketplace extension `relife.relife-portfolio`
+- Produces: Marketplace extension `clannad0710.relife-portfolio`
 
 - [ ] 添加 Publisher、VS Code engine、workspace extensionKind、激活事件和命令清单。
 - [ ] 添加仅包含扩展宿主、Webview 构建产物和 README 的 `files` 白名单。
