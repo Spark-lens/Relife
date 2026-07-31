@@ -4,6 +4,25 @@
 
 ## 使用
 
+### 安装 0.2.0
+
+在打开 Relife 工作区的 VS Code 窗口中：
+
+1. 打开“扩展”视图（`Ctrl+Shift+X`）。
+2. 点击扩展视图右上角的 `…`，选择“从 VSIX 安装…”。
+3. 选择 `portfolio_viewer/relife-portfolio-0.2.0.vsix`。
+4. 安装完成后按提示重新加载窗口，并确认 `Relife Portfolio` 的版本为 `0.2.0`。
+
+也可以在仓库根目录执行：
+
+```bash
+code --install-extension portfolio_viewer/relife-portfolio-0.2.0.vsix --force
+```
+
+如果 Relife 工作区通过 WSL 打开，请在该 WSL 窗口中安装，使扩展运行在能够访问仓库和 Python 环境的扩展宿主中。
+
+### 打开投资组合
+
 打开包含以下路径的 Relife 工作区：
 
 ```text
@@ -12,10 +31,12 @@ portfolio_viewer/scripts/generate_portfolio_dashboard.py
 portfolio_viewer/public/data/portfolio.json
 ```
 
-在命令面板运行：
+点击 Activity Bar 中的 `Re` 图标，再点击侧栏中的“打开投资组合”；也可以在命令面板运行：
 
 - `Relife: 打开投资组合`
 - `Relife: 立即更新数据`
+
+投资组合页面顶部的“立即更新”按钮会在更新期间禁用；更新失败时保留当前数据并显示错误。
 
 扩展激活时会立即更新一次。VS Code 保持打开时，还会按上海时间自动更新：
 

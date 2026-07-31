@@ -5,6 +5,7 @@ import { defineConfig } from "vite";
 const root = fileURLToPath(new URL("..", import.meta.url));
 
 export default defineConfig({
+  define: { "process.env.NODE_ENV": JSON.stringify("production") },
   publicDir: false,
   plugins: [react()],
   build: {

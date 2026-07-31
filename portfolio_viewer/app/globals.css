@@ -45,6 +45,48 @@ button {
   color: inherit;
 }
 
+.refresh-button {
+  min-width: 88px;
+  padding: 7px 12px;
+  border: 1px solid var(--border-strong);
+  border-radius: 6px;
+  background: var(--surface-soft);
+  cursor: pointer;
+}
+
+.refresh-button:hover:not(:disabled) {
+  background: #303030;
+}
+
+.refresh-button:disabled {
+  color: var(--text-muted);
+  cursor: wait;
+}
+
+.loading-actions {
+  display: flex;
+  min-height: 64px;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 28px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.refresh-error {
+  max-width: 280px;
+  overflow: hidden;
+  padding: 9px 12px;
+  border: 1px solid color-mix(in srgb, var(--positive) 45%, var(--border));
+  border-radius: 6px;
+  background: var(--surface-raised);
+  color: var(--positive);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 button:focus-visible,
 input:focus-visible {
   outline: 2px solid var(--accent);
@@ -892,6 +934,11 @@ footer {
 }
 
 @media (max-width: 980px) {
+  .topbar-meta .market-status,
+  .topbar-meta .status-dot {
+    display: none;
+  }
+
   .overview-grid {
     grid-template-columns: 1fr;
   }
@@ -930,6 +977,10 @@ footer {
   }
 
   .topbar-meta {
+    grid-column: 1 / -1;
+  }
+
+  .topbar-meta .avatar {
     display: none;
   }
 

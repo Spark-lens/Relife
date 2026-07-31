@@ -39,7 +39,13 @@ npm --prefix portfolio_viewer run vscode:build
 npm --prefix portfolio_viewer run vscode:package
 ```
 
-安装后可在命令面板运行 `Relife: 打开投资组合`。VS Code 打开期间，插件会按上海时间在 A 股 09:15/15:15、美股 21:15/次日 05:15 自动更新。
+安装本地 0.2.0 包：在 VS Code 扩展视图右上角选择“从 VSIX 安装…”，选择 `portfolio_viewer/relife-portfolio-0.2.0.vsix`；或在仓库根目录执行：
+
+```bash
+code --install-extension portfolio_viewer/relife-portfolio-0.2.0.vsix --force
+```
+
+安装后可点击 Activity Bar 中的 `Re` 图标打开投资组合，也可继续使用命令面板。页面顶部支持立即更新；VS Code 打开期间，插件会按上海时间在 A 股 09:15/15:15、美股 21:15/次日 05:15 自动更新。
 
 Python 使用 `/home/clannad/miniforge3/envs/istorm_rag_gpu`。行情查询仅向服务商发送标的代码和日期范围，不发送持仓数量、成本、账户余额或原始交易文件。账本会按行情源的拆并股事件换算到当前股本口径，交易记录仍展示原始成交数量与价格。持仓列的显示与顺序保存在当前设备浏览器中。
 

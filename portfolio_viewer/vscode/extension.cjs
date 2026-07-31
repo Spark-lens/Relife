@@ -9,6 +9,7 @@ const {
   singleFlight,
 } = require("./portfolio.cjs");
 const { scheduleUpdates } = require("./schedule.cjs");
+const { createPortfolioTreeDataProvider } = require("./sidebar.cjs");
 
 function activate(context) {
   const output = vscode.window.createOutputChannel("Relife Portfolio");
@@ -18,9 +19,13 @@ function activate(context) {
   let panel;
   let portfolio;
 
+  function postToWebview(message) {
+    panel?.webview.postMessage(message);
+  }
+
   function sendPortfolio() {
     if (panel && portfolio) {
-      panel.webview.postMessage({ type: "portfolio", data: portfolio });
+      postToWebview({ type: "portfolio", data: portfolio });
     }
   }
 
@@ -28,16 +33,20 @@ function activate(context) {
     if (!repositoryRoot) {
       throw new Error("当前工作区不是 Relife 仓库");
     }
+    postToWebview({ type: "refresh-start" });
     output.appendLine(`[${new Date().toISOString()}] 开始更新投资组合`);
     try {
       portfolio = await refreshPortfolio(repositoryRoot);
       sendPortfolio();
+      postToWebview({ type: "refresh-success" });
       output.appendLine(`[${new Date().toISOString()}] 投资组合更新完成`);
       return portfolio;
     } catch (error) {
       const detail = error?.stderr || error?.stack || String(error);
+      const message = error?.message || String(error);
       output.appendLine(`[${new Date().toISOString()}] 更新失败\n${detail}`);
-      vscode.window.showErrorMessage(`Relife 投资组合更新失败：${error.message}`);
+      vscode.window.showErrorMessage(`Relife 投资组合更新失败：${message}`);
+      postToWebview({ type: "refresh-error", message });
       throw error;
     }
   });
@@ -64,6 +73,7 @@ function activate(context) {
     panel.webview.onDidReceiveMessage(
       (message) => {
         if (message?.type === "ready") sendPortfolio();
+        if (message?.type === "refresh") refresh().catch(() => {});
       },
       undefined,
       context.subscriptions,
@@ -75,6 +85,10 @@ function activate(context) {
 
   context.subscriptions.push(
     output,
+    vscode.window.registerTreeDataProvider(
+      "relifePortfolio.actions",
+      createPortfolioTreeDataProvider(vscode),
+    ),
     vscode.commands.registerCommand("relifePortfolio.open", openPortfolio),
     vscode.commands.registerCommand("relifePortfolio.refresh", () =>
       vscode.window.withProgress(

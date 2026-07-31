@@ -2,7 +2,7 @@
   "name": "relife-portfolio",
   "displayName": "Relife Portfolio",
   "description": "在 VS Code 中查看并定时更新 Relife 仓库的 A 股与美股投资组合。",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "publisher": "clannad0710",
   "private": true,
   "license": "Apache-2.0",
@@ -49,6 +49,23 @@
     "onCommand:relifePortfolio.refresh"
   ],
   "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "relifePortfolio",
+          "title": "Relife Portfolio",
+          "icon": "media/activitybar.svg"
+        }
+      ]
+    },
+    "views": {
+      "relifePortfolio": [
+        {
+          "id": "relifePortfolio.actions",
+          "name": "Relife Portfolio"
+        }
+      ]
+    },
     "commands": [
       {
         "command": "relifePortfolio.open",
@@ -62,9 +79,11 @@
   },
   "files": [
     "media/icon.png",
+    "media/activitybar.svg",
     "vscode/extension.cjs",
     "vscode/portfolio.cjs",
     "vscode/schedule.cjs",
+    "vscode/sidebar.cjs",
     "vscode/dist/**",
     "README.md"
   ],
@@ -78,7 +97,7 @@
     "portfolio:data": "/home/clannad/miniforge3/envs/istorm_rag_gpu/bin/python scripts/generate_portfolio_dashboard.py",
     "portfolio:update": "npm run portfolio:data && npm run build",
     "vscode:build": "vite build --config vscode/vite.config.ts",
-    "vscode:test": "node --test tests/vscode-portfolio.test.mjs tests/vscode-schedule.test.mjs",
+    "vscode:test": "node --test tests/vscode-portfolio.test.mjs tests/vscode-schedule.test.mjs tests/vscode-sidebar.test.mjs tests/vscode-webview.test.mjs tests/vscode-refresh-control.test.mjs tests/vscode-extension.test.mjs",
     "vscode:package:test": "node --test tests/vscode-package.test.mjs",
     "vscode:package": "npm run vscode:test && npm run vscode:build && npm run vscode:package:test && node node_modules/@vscode/vsce/vsce package",
     "vscode:prepublish": "npm run vscode:build"

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import type { ReactNode } from "react";
 
 import {
   DEFAULT_COLUMNS,
@@ -37,7 +38,13 @@ function valueClass(value: number) {
   return value > 0 ? "positive" : value < 0 ? "negative" : "";
 }
 
-export function PortfolioDashboard({ data }: { data: DashboardPayload }) {
+export function PortfolioDashboard({
+  data,
+  toolbar,
+}: {
+  data: DashboardPayload;
+  toolbar?: ReactNode;
+}) {
   const [marketKey, setMarketKey] = useState<MarketKey>("us");
   const [page, setPage] = useState<PageKey>("overview");
   const [range, setRange] = useState<RangeKey>("all");
@@ -119,8 +126,9 @@ export function PortfolioDashboard({ data }: { data: DashboardPayload }) {
           </button>
         </div>
         <div className="topbar-meta">
+          {toolbar}
           <span className="status-dot" />
-          <span>收盘数据 · {market.asOf}</span>
+          <span className="market-status">收盘数据 · {market.asOf}</span>
           <span className="avatar">R</span>
         </div>
       </header>
