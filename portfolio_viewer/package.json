@@ -1,19 +1,87 @@
 {
   "name": "relife-portfolio",
+  "displayName": "Relife Portfolio",
+  "description": "在 VS Code 中查看并定时更新 Relife 仓库的 A 股与美股投资组合。",
   "version": "0.1.0",
+  "publisher": "relife",
   "private": true,
-  "engines": {
-    "node": ">=22.13.0"
+  "license": "Apache-2.0",
+  "icon": "media/icon.png",
+  "categories": [
+    "Visualization",
+    "Other"
+  ],
+  "keywords": [
+    "portfolio",
+    "stocks",
+    "A股",
+    "美股",
+    "投资组合"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Spark-lens/Relife.git",
+    "directory": "portfolio_viewer"
   },
+  "homepage": "https://github.com/Spark-lens/Relife",
+  "bugs": "https://github.com/Spark-lens/Relife/issues",
+  "pricing": "Free",
+  "galleryBanner": {
+    "color": "#111111",
+    "theme": "dark"
+  },
+  "engines": {
+    "node": ">=22.13.0",
+    "vscode": "^1.95.0"
+  },
+  "main": "./vscode/extension.cjs",
+  "extensionKind": [
+    "workspace"
+  ],
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": false
+    }
+  },
+  "activationEvents": [
+    "onStartupFinished",
+    "onCommand:relifePortfolio.open",
+    "onCommand:relifePortfolio.refresh"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "relifePortfolio.open",
+        "title": "Relife: 打开投资组合"
+      },
+      {
+        "command": "relifePortfolio.refresh",
+        "title": "Relife: 立即更新数据"
+      }
+    ]
+  },
+  "files": [
+    "media/icon.png",
+    "vscode/extension.cjs",
+    "vscode/portfolio.cjs",
+    "vscode/schedule.cjs",
+    "vscode/dist/**",
+    "README.md"
+  ],
   "scripts": {
     "dev": "WRANGLER_LOG_PATH=.wrangler/wrangler.log vinext dev",
     "build": "WRANGLER_LOG_PATH=.wrangler/wrangler.log vinext build",
     "start": "WRANGLER_LOG_PATH=.wrangler/wrangler.log vinext start",
     "test": "npm run build && node --test tests/rendered-html.test.mjs",
-    "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
+    "lint": "eslint . --ignore-pattern dist --ignore-pattern vscode/dist --ignore-pattern .next",
     "db:generate": "drizzle-kit generate",
     "portfolio:data": "/home/clannad/miniforge3/envs/istorm_rag_gpu/bin/python scripts/generate_portfolio_dashboard.py",
-    "portfolio:update": "npm run portfolio:data && npm run build"
+    "portfolio:update": "npm run portfolio:data && npm run build",
+    "vscode:build": "vite build --config vscode/vite.config.ts",
+    "vscode:test": "node --test tests/vscode-portfolio.test.mjs tests/vscode-schedule.test.mjs",
+    "vscode:package:test": "node --test tests/vscode-package.test.mjs",
+    "vscode:package": "npm run vscode:test && npm run vscode:build && npm run vscode:package:test && node node_modules/@vscode/vsce/vsce package",
+    "vscode:prepublish": "npm run vscode:build"
   },
   "dependencies": {
     "drizzle-orm": "0.45.2",
@@ -29,6 +97,7 @@
     "@types/react-dom": "19.2.3",
     "@vitejs/plugin-react": "6.0.2",
     "@vitejs/plugin-rsc": "0.5.26",
+    "@vscode/vsce": "^3.9.2",
     "drizzle-kit": "0.31.10",
     "eslint": "9.39.4",
     "eslint-config-next": "16.2.6",
