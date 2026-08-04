@@ -1,0 +1,72 @@
+{
+  "generatedAt": "2026-08-01T08:00:00Z",
+  "cache": {"stale": false, "lastSuccessAt": "2026-08-01T08:00:00Z"},
+  "errors": [],
+  "markets": {
+    "us": {
+      "market": "us",
+      "currency": "USD",
+      "benchmark": {"symbol": "^GSPC", "name": "SPX"},
+      "source": {"mode": "sample", "label": "示例数据"},
+      "asOf": "2026-07-31",
+      "incomplete": false,
+      "summary": {"portfolioValue": 128452.38, "cash": 18400.00, "unrealized": 12362.00, "lastDayAmount": 742.60, "lastDayPercent": 0.0068, "realized": -10.70, "tradingRealized": -820.40, "netDividends": 809.70, "totalReturn": 12351.30, "totalReturnRate": 0.1142, "annualizedReturn": 0.0876},
+      "holdings": [
+        {"symbol": "NOVA", "name": "新星科技（示例）", "quantity": 220, "averageCost": 182.4, "remainingCost": 40128, "lastPrice": 218.6, "previousClose": 216.1, "marketValue": 48092, "unrealized": 7964, "unrealizedPercent": 0.1985, "lastDayAmount": 550, "lastDayPercent": 0.0116, "realized": -430.2, "netDividends": 0},
+        {"symbol": "LUMA", "name": "流明消费（示例）", "quantity": 310, "averageCost": 96.5, "remainingCost": 29915, "lastPrice": 104.2, "previousClose": 103.9, "marketValue": 32302, "unrealized": 2387, "unrealizedPercent": 0.0798, "lastDayAmount": 93, "lastDayPercent": 0.0029, "realized": 84.8, "netDividends": 392.7},
+        {"symbol": "ORBT", "name": "轨道能源（示例）", "quantity": 270, "averageCost": 102.5, "remainingCost": 27675, "lastPrice": 124.66, "previousClose": 124.29, "marketValue": 33658.2, "unrealized": 2011, "unrealizedPercent": 0.0727, "lastDayAmount": 99.9, "lastDayPercent": 0.003, "realized": -475, "netDividends": 417}
+      ],
+      "soldHoldings": [{"symbol": "PINE", "name": "松林软件（已售示例）", "quantity": 0, "marketValue": 0, "realized": 315.2, "netDividends": 0}],
+      "prices": [
+        {"symbol": "NOVA", "name": "新星科技（示例）", "latest": 218.6, "change": 2.5, "changePercent": 0.0116},
+        {"symbol": "LUMA", "name": "流明消费（示例）", "latest": 104.2, "change": 0.3, "changePercent": 0.0029},
+        {"symbol": "ORBT", "name": "轨道能源（示例）", "latest": 124.66, "change": 0.37, "changePercent": 0.003}
+      ],
+      "transactions": [
+        {"date": "2026-07-28", "symbol": "LUMA", "name": "流明消费（示例）", "kind": "dividend", "action": "Dividend", "quantity": 124, "price": 0, "fee": 0, "amount": 124, "balance": null},
+        {"date": "2026-07-16", "symbol": "NOVA", "name": "新星科技（示例）", "kind": "buy", "action": "Buy", "quantity": 20, "price": 207.5, "fee": 1, "amount": -4151, "balance": null},
+        {"date": "2026-06-05", "symbol": "PINE", "name": "松林软件（已售示例）", "kind": "sell", "action": "Sell", "quantity": 40, "price": 88.2, "fee": 1, "amount": 3527, "balance": null},
+        {"date": "2026-01-03", "symbol": "", "name": "", "kind": "deposit", "action": "Deposit", "quantity": 10000, "price": 0, "fee": 0, "amount": 10000, "balance": null}
+      ],
+      "cashTransactions": [{"date": "2026-01-03", "symbol": "", "name": "", "kind": "deposit", "action": "Deposit", "quantity": 10000, "price": 0, "fee": 0, "amount": 10000, "balance": null}],
+      "dividends": [{"date": "2026-07-28", "symbol": "LUMA", "name": "流明消费（示例）", "kind": "dividend", "action": "Dividend", "quantity": 124, "price": 0, "fee": 0, "amount": 124, "balance": null}],
+      "dividendCalendar": [{"date": "2026-08-18", "symbol": "ORBT", "amount": 0.42, "status": "预计除息"}, {"date": "2026-09-03", "symbol": "LUMA", "amount": 0.31, "status": "预计除息"}],
+      "curve": [{"date": "2026-02-01", "portfolio": 100, "benchmark": 100}, {"date": "2026-03-01", "portfolio": 102.8, "benchmark": 101.2}, {"date": "2026-04-01", "portfolio": 99.6, "benchmark": 98.7}, {"date": "2026-05-01", "portfolio": 105.4, "benchmark": 103.1}, {"date": "2026-06-01", "portfolio": 109.2, "benchmark": 105.8}, {"date": "2026-07-31", "portfolio": 111.42, "benchmark": 107.4}],
+      "distribution": [{"symbol": "NOVA", "name": "新星科技（示例）", "value": 48092}, {"symbol": "ORBT", "name": "轨道能源（示例）", "value": 33658.2}, {"symbol": "LUMA", "name": "流明消费（示例）", "value": 32302}],
+      "risk": {"beta": 0.94, "sharpe": 1.18, "sortino": 1.71, "sampleDays": 252},
+      "errors": []
+    },
+    "cn": {
+      "market": "cn",
+      "currency": "CNY",
+      "benchmark": {"symbol": "sh000300", "name": "沪深300"},
+      "source": {"mode": "sample", "label": "示例数据"},
+      "asOf": "2026-07-31",
+      "incomplete": false,
+      "summary": {"portfolioValue": 486320.50, "cash": 62300.50, "unrealized": 28640, "lastDayAmount": -1380, "lastDayPercent": -0.0032, "realized": 9850, "tradingRealized": 7240, "netDividends": 2610, "totalReturn": 38490, "totalReturnRate": 0.093, "annualizedReturn": 0.071},
+      "holdings": [
+        {"symbol": "600X01", "name": "华光制造（示例）", "quantity": 8000, "averageCost": 24.2, "remainingCost": 193600, "lastPrice": 27.8, "previousClose": 28.05, "marketValue": 222400, "unrealized": 28800, "unrealizedPercent": 0.1488, "lastDayAmount": -2000, "lastDayPercent": -0.0089, "realized": 4100, "netDividends": 1280},
+        {"symbol": "300X02", "name": "远山医疗器械与数字服务（示例）", "quantity": 3000, "averageCost": 45.6, "remainingCost": 136800, "lastPrice": 47.2, "previousClose": 46.9, "marketValue": 141600, "unrealized": 4800, "unrealizedPercent": 0.0351, "lastDayAmount": 900, "lastDayPercent": 0.0064, "realized": 3140, "netDividends": 480},
+        {"symbol": "000X03", "name": "蓝湾公用（示例）", "quantity": 5000, "averageCost": 12.45, "remainingCost": 62250, "lastPrice": 12, "previousClose": 12.056, "marketValue": 60000, "unrealized": -2250, "unrealizedPercent": -0.0361, "lastDayAmount": -280, "lastDayPercent": -0.0046, "realized": 0, "netDividends": 850}
+      ],
+      "soldHoldings": [{"symbol": "002X09", "name": "云帆材料（已售示例）", "quantity": 0, "marketValue": 0, "realized": 2200, "netDividends": 0}],
+      "prices": [
+        {"symbol": "600X01", "name": "华光制造（示例）", "latest": 27.8, "change": -0.25, "changePercent": -0.0089},
+        {"symbol": "300X02", "name": "远山医疗器械与数字服务（示例）", "latest": 47.2, "change": 0.3, "changePercent": 0.0064},
+        {"symbol": "000X03", "name": "蓝湾公用（示例）", "latest": 12, "change": -0.056, "changePercent": -0.0046}
+      ],
+      "transactions": [
+        {"date": "2026-07-30", "symbol": "000X03", "name": "蓝湾公用（示例）", "kind": "dividend", "action": "红利入账", "quantity": 0, "price": 0, "fee": 0, "amount": 850, "balance": 62300.5},
+        {"date": "2026-07-18", "symbol": "300X02", "name": "远山医疗器械与数字服务（示例）", "kind": "buy", "action": "证券买入", "quantity": 500, "price": 46.1, "fee": 5, "amount": -23055, "balance": 61450.5},
+        {"date": "2026-01-02", "symbol": "", "name": "", "kind": "deposit", "action": "银行转证券", "quantity": 0, "price": 0, "fee": 0, "amount": 100000, "balance": 100000}
+      ],
+      "cashTransactions": [{"date": "2026-01-02", "symbol": "", "name": "", "kind": "deposit", "action": "银行转证券", "quantity": 0, "price": 0, "fee": 0, "amount": 100000, "balance": 100000}],
+      "dividends": [{"date": "2026-07-30", "symbol": "000X03", "name": "蓝湾公用（示例）", "kind": "dividend", "action": "红利入账", "quantity": 0, "price": 0, "fee": 0, "amount": 850, "balance": 62300.5}],
+      "dividendCalendar": [{"date": "2026-08-22", "symbol": "600X01", "amount": 0.18, "status": "公司行动"}],
+      "curve": [{"date": "2026-02-01", "portfolio": 100, "benchmark": 100}, {"date": "2026-03-01", "portfolio": 101.2, "benchmark": 99.5}, {"date": "2026-04-01", "portfolio": 97.8, "benchmark": 96.1}, {"date": "2026-05-01", "portfolio": 103.6, "benchmark": 101.3}, {"date": "2026-06-01", "portfolio": 106.4, "benchmark": 103.8}, {"date": "2026-07-31", "portfolio": 109.3, "benchmark": 105.2}],
+      "distribution": [{"symbol": "600X01", "name": "华光制造（示例）", "value": 222400}, {"symbol": "300X02", "name": "远山医疗器械与数字服务（示例）", "value": 141600}, {"symbol": "000X03", "name": "蓝湾公用（示例）", "value": 60000}],
+      "risk": {"beta": 0.82, "sharpe": 0.91, "sortino": 1.23, "sampleDays": 248},
+      "errors": []
+    }
+  }
+}

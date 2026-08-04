@@ -1,0 +1,65 @@
+{
+  "name": "relife",
+  "displayName": "Relife",
+  "description": "TradingView 风格的双市场投资组合与策略工作台。",
+  "version": "0.0.1",
+  "publisher": "clannad0710",
+  "private": true,
+  "license": "Apache-2.0",
+  "categories": ["Visualization", "Other"],
+  "keywords": ["portfolio", "stocks", "A股", "美股", "投资组合"],
+  "repository": {"type": "git", "url": "https://github.com/Spark-lens/Relife.git", "directory": "vscode-extensions"},
+  "engines": {"node": ">=22.13.0", "vscode": "^1.95.0"},
+  "main": "./extension.cjs",
+  "extensionKind": ["workspace"],
+  "activationEvents": ["onStartupFinished", "onView:relife.sidebar", "onCommand:relife.openPortfolio"],
+  "capabilities": {"untrustedWorkspaces": {"supported": false}},
+  "contributes": {
+    "viewsContainers": {"activitybar": [{"id": "relife", "title": "Relife", "icon": "media/activitybar.svg"}]},
+    "views": {"relife": [{"id": "relife.sidebar", "name": "Relife", "type": "webview"}]},
+    "commands": [
+      {"command": "relife.openPortfolio", "title": "Relife: 投资组合"},
+      {"command": "relife.openStrategy", "title": "Relife: 布林带策略"},
+      {"command": "relife.selectUsSource", "title": "Relife: 选择美股文件"},
+      {"command": "relife.selectCnSource", "title": "Relife: 选择 A 股文件"},
+      {"command": "relife.resetSources", "title": "Relife: 恢复示例数据"},
+      {"command": "relife.refresh", "title": "Relife: 刷新数据"}
+    ],
+    "menus": {"view/title": [{"command": "relife.refresh", "when": "view == relife.sidebar", "group": "navigation@1"}]},
+    "configuration": {
+      "title": "Relife",
+      "properties": {
+        "relife.pythonPath": {
+          "type": "string",
+          "default": "/home/clannad/miniforge3/envs/istorm_rag_gpu/bin/python",
+          "description": "运行 Relife 数据引擎的 Python 3.12 解释器。"
+        }
+      }
+    }
+  },
+  "files": [
+    "extension.cjs", "src/*.mjs", "src/webview-html.cjs", "dist/**", "python/**",
+    "resources/sample/**", "media/**", "README.md", "LICENSE"
+  ],
+  "scripts": {
+    "test:node": "node --test tests/node/*.test.mjs",
+    "test:python": "/home/clannad/miniforge3/envs/istorm_rag_gpu/bin/python -m unittest discover -s tests/python -v",
+    "test": "npm run test:node && npm run test:python",
+    "build": "vite build",
+    "package:check": "npm test && npm run build",
+    "package": "npm run package:check && vsce package --out clannad0710.relife-0.0.1.vsix",
+    "vscode:prepublish": "npm run build"
+  },
+  "dependencies": {
+    "react": "19.2.6",
+    "react-dom": "19.2.6"
+  },
+  "devDependencies": {
+    "@types/react": "19.2.14",
+    "@types/react-dom": "19.2.3",
+    "@vitejs/plugin-react": "6.0.2",
+    "@vscode/vsce": "3.9.2",
+    "typescript": "5.9.3",
+    "vite": "8.0.13"
+  }
+}
