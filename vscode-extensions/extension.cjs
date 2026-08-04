@@ -1,5 +1,6 @@
 const { spawn } = require("node:child_process");
 const { randomBytes } = require("node:crypto");
+const { existsSync } = require("node:fs");
 const fs = require("node:fs/promises");
 const path = require("node:path");
 const vscode = require("vscode");
@@ -29,7 +30,13 @@ async function activate(context) {
   const broadcast = (message) => webviews.forEach((webview) => webview.postMessage(message));
 
   async function runEngine(payload) {
-    const python = vscode.workspace.getConfiguration("relife").get("pythonPath");
+    const configuredPython = vscode.workspace.getConfiguration("relife").get("pythonPath", "").trim();
+    const condaPython = process.env.CONDA_PREFIX
+      ? path.join(process.env.CONDA_PREFIX, process.platform === "win32" ? "python.exe" : "bin/python")
+      : "";
+    const python = configuredPython || (condaPython && existsSync(condaPython)
+      ? condaPython
+      : process.platform === "win32" ? "python" : "python3");
     const cli = context.asAbsolutePath(path.join("python", "relife_cli.py"));
     return new Promise((resolve, reject) => {
       const process = spawn(python, [cli], { cwd: context.extensionPath, stdio: ["pipe", "pipe", "pipe"] });
@@ -38,7 +45,9 @@ async function activate(context) {
       const timer = setTimeout(() => process.kill(), 120000);
       process.stdout.on("data", (chunk) => { stdout += chunk; });
       process.stderr.on("data", (chunk) => { stderr += chunk; });
-      process.on("error", reject);
+      process.on("error", (error) => reject(new Error(error.code === "ENOENT"
+        ? `找不到 Python 解释器“${python}”。请在设置 relife.pythonPath 中指定可用的 Python 3.12 路径`
+        : error.message)));
       process.on("close", (code) => {
         clearTimeout(timer);
         try {

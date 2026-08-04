@@ -9,7 +9,11 @@ test("扩展清单注册新身份、侧栏、命令和 Python 设置", () => {
   assert.equal(manifest.main, "./extension.cjs");
   assert.equal(manifest.contributes.viewsContainers.activitybar[0].id, "relife");
   assert.equal(manifest.contributes.views.relife[0].id, "relife.sidebar");
-  assert.equal(manifest.contributes.configuration.properties["relife.pythonPath"].default, "/home/clannad/miniforge3/envs/istorm_rag_gpu/bin/python");
+  assert.equal(manifest.contributes.configuration.properties["relife.pythonPath"].default, "");
+  const extension = fs.readFileSync(new URL("../../extension.cjs", import.meta.url), "utf8");
+  assert.match(extension, /CONDA_PREFIX/);
+  assert.match(extension, /python3/);
+  assert.doesNotMatch(extension, /\/home\/clannad/);
   const commands = manifest.contributes.commands.map((item) => item.command);
   for (const command of ["relife.openPortfolio", "relife.selectUsSource", "relife.selectCnSource", "relife.resetSources", "relife.refresh"]) assert.ok(commands.includes(command));
   assert.ok(!manifest.files.some((entry) => entry.includes("portfolio_viewer") || entry.includes("data/transactions")));

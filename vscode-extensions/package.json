@@ -31,8 +31,8 @@
       "properties": {
         "relife.pythonPath": {
           "type": "string",
-          "default": "/home/clannad/miniforge3/envs/istorm_rag_gpu/bin/python",
-          "description": "运行 Relife 数据引擎的 Python 3.12 解释器。"
+          "default": "",
+          "description": "运行 Relife 数据引擎的 Python 3.12 解释器。留空时优先使用当前 Conda 环境，否则使用系统 Python。"
         }
       }
     }
