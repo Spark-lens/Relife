@@ -14,6 +14,11 @@ test("the extension handles webview refresh success and failure messages", async
   const commands = new Map();
   const messages = [];
   const notifications = [];
+  const delivered = [];
+  let checkRuns = 0;
+  let editorOptions;
+  let resolveWatchlist;
+  const pendingWatchlist = new Promise((resolve) => { resolveWatchlist = resolve; });
   let receiveMessage;
   let nextRefresh = { generatedAt: "auto" };
   const panel = {
@@ -45,6 +50,8 @@ test("the extension handles webview refresh success and failure messages", async
       createWebviewPanel: () => panel,
       registerTreeDataProvider: () => ({ dispose() {} }),
       showErrorMessage: (message) => notifications.push(message),
+      showWarningMessage: (message) => notifications.push(message),
+      showInformationMessage: (message) => notifications.push(message),
       withProgress: (_options, task) => task(),
     },
     commands: {
@@ -58,6 +65,10 @@ test("the extension handles webview refresh success and failure messages", async
     ProgressLocation: { Notification: 1 },
     TreeItem,
     TreeItemCollapsibleState: { None: 0 },
+    EventEmitter: class {
+      event = () => {};
+      fire() {}
+    },
   };
   const portfolio = {
     findRelifeRoot: () => "/repo",
@@ -77,6 +88,32 @@ test("the extension handles webview refresh success and failure messages", async
     if (parent?.filename === extensionPath && request === "./schedule.cjs") {
       return { scheduleUpdates: () => ({ dispose() {} }) };
     }
+    if (parent?.filename === extensionPath && request === "./alerts.cjs") {
+      return {
+        deliverAlerts: async (alerts) => delivered.push(alerts),
+        registerFeishuCommands: () => [],
+        runWatchlistCheck: async () => {
+          checkRuns += 1;
+          return { checkedAt: "now", results: [{}], alerts: [{ symbol: "QQQ" }], errors: [] };
+        },
+        sendFeishu: async () => {},
+      };
+    }
+    if (parent?.filename === extensionPath && request === "./watchlist.cjs") {
+      return {
+        loadWatchlist: () => pendingWatchlist,
+        saveWatchlist: async () => {},
+        watchlistPath: () => "/repo/portfolio_viewer/data/watchlist.json",
+      };
+    }
+    if (parent?.filename === extensionPath && request === "./watchlist-editor.cjs") {
+      return {
+        registerWatchlistCommands: (_vscode, options) => {
+          editorOptions = options;
+          return [];
+        },
+      };
+    }
     return originalLoad.call(this, request, parent, isMain);
   };
 
@@ -88,13 +125,21 @@ test("the extension handles webview refresh success and failure messages", async
     Module._load = originalLoad;
   }
 
-  extension.activate({ extensionUri: "/extension", subscriptions: [] });
+  extension.activate({
+    extensionUri: "/extension",
+    subscriptions: [],
+    workspaceState: { get: (_key, fallback) => fallback, async update() {} },
+    secrets: { async get() {}, async store() {}, async delete() {} },
+  });
+  assert.throws(() => editorOptions.getWatchlist(), /观察列表尚未加载/);
+  resolveWatchlist({ groups: [] });
   await flush();
   commands.get("relifePortfolio.open")();
   receiveMessage({ type: "ready" });
   messages.length = 0;
 
   nextRefresh = { generatedAt: "new" };
+  const checksBeforeRefresh = checkRuns;
   receiveMessage({ type: "refresh" });
   await flush();
   assert.deepEqual(messages, [
@@ -102,6 +147,8 @@ test("the extension handles webview refresh success and failure messages", async
     { type: "portfolio", data: { generatedAt: "new" } },
     { type: "refresh-success" },
   ]);
+  assert.equal(checkRuns, checksBeforeRefresh + 1);
+  assert.deepEqual(delivered.at(-1), [{ symbol: "QQQ" }]);
 
   messages.length = 0;
   nextRefresh = new Error("provider unavailable");
@@ -114,4 +161,5 @@ test("the extension handles webview refresh success and failure messages", async
   assert.deepEqual(notifications, [
     "Relife 投资组合更新失败：provider unavailable",
   ]);
+  assert.deepEqual(delivered.at(-1), [{ symbol: "QQQ" }]);
 });

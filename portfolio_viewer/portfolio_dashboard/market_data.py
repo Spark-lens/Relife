@@ -60,6 +60,7 @@ def _repair_price_discontinuities(
 
 class YahooPriceProvider:
     SYMBOL_MAP = {
+        "BRK.B": "BRK-B",
         "BRKB": "BRK-B",
         "__QQQ__": "QQQ",
         "__SPY__": "SPY",

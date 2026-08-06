@@ -10,6 +10,18 @@ const {
 } = require("./portfolio.cjs");
 const { scheduleUpdates } = require("./schedule.cjs");
 const { createPortfolioTreeDataProvider } = require("./sidebar.cjs");
+const {
+  deliverAlerts,
+  registerFeishuCommands,
+  runWatchlistCheck,
+  sendFeishu,
+} = require("./alerts.cjs");
+const {
+  loadWatchlist,
+  saveWatchlist,
+  watchlistPath,
+} = require("./watchlist.cjs");
+const { registerWatchlistCommands } = require("./watchlist-editor.cjs");
 
 function activate(context) {
   const output = vscode.window.createOutputChannel("Relife Portfolio");
@@ -18,6 +30,8 @@ function activate(context) {
   );
   let panel;
   let portfolio;
+  let watchlist;
+  const sidebar = createPortfolioTreeDataProvider(vscode, { groups: [] });
 
   function postToWebview(message) {
     panel?.webview.postMessage(message);
@@ -51,6 +65,53 @@ function activate(context) {
     }
   });
 
+  const checkAlerts = singleFlight(async () => {
+    if (!repositoryRoot) throw new Error("当前工作区不是 Relife 仓库");
+    output.appendLine(`[${new Date().toISOString()}] 开始检查观察策略`);
+    try {
+      const payload = await runWatchlistCheck(repositoryRoot);
+      for (const error of payload.errors ?? []) {
+        output.appendLine(
+          `观察策略数据错误：${error.symbol ?? "配置"} ${error.timeframe ?? ""} ${error.message}`,
+        );
+      }
+      await deliverAlerts(payload.alerts ?? [], {
+        workspaceState: context.workspaceState,
+        secrets: context.secrets,
+        showWarningMessage: (message) => vscode.window.showWarningMessage(message),
+        showErrorMessage: (message) => vscode.window.showErrorMessage(message),
+        output,
+        send: sendFeishu,
+      });
+      if ((payload.errors?.length ?? 0) > 0 && (payload.results?.length ?? 0) === 0) {
+        vscode.window.showWarningMessage(
+          `Relife 观察策略检查无可用结果：${payload.errors.length} 项错误，详情见输出日志`,
+        );
+      }
+      output.appendLine(
+        `[${new Date().toISOString()}] 观察策略检查完成：${payload.alerts?.length ?? 0} 个候选`,
+      );
+      return payload;
+    } catch (error) {
+      const detail = error?.stderr || error?.stack || String(error);
+      const message = error?.message || String(error);
+      output.appendLine(`[${new Date().toISOString()}] 观察策略检查失败\n${detail}`);
+      vscode.window.showErrorMessage(`Relife 观察策略检查失败：${message}`);
+      throw error;
+    }
+  });
+
+  async function runUpdates() {
+    return Promise.allSettled([refresh(), checkAlerts()]);
+  }
+
+  async function persistWatchlist(next) {
+    if (!repositoryRoot) throw new Error("当前工作区不是 Relife 仓库");
+    await saveWatchlist(watchlistPath(repositoryRoot), next);
+    watchlist = next;
+    sidebar.refresh(watchlist);
+  }
+
   function openPortfolio() {
     if (!repositoryRoot) {
       vscode.window.showErrorMessage("当前工作区不是 Relife 仓库");
@@ -73,7 +134,7 @@ function activate(context) {
     panel.webview.onDidReceiveMessage(
       (message) => {
         if (message?.type === "ready") sendPortfolio();
-        if (message?.type === "refresh") refresh().catch(() => {});
+        if (message?.type === "refresh") runUpdates();
       },
       undefined,
       context.subscriptions,
@@ -87,7 +148,7 @@ function activate(context) {
     output,
     vscode.window.registerTreeDataProvider(
       "relifePortfolio.actions",
-      createPortfolioTreeDataProvider(vscode),
+      sidebar,
     ),
     vscode.commands.registerCommand("relifePortfolio.open", openPortfolio),
     vscode.commands.registerCommand("relifePortfolio.refresh", () =>
@@ -96,20 +157,37 @@ function activate(context) {
           location: vscode.ProgressLocation.Notification,
           title: "正在更新 Relife 投资组合",
         },
-        refresh,
+        runUpdates,
       ),
     ),
+    ...registerWatchlistCommands(vscode, {
+      getWatchlist: () => {
+        if (!watchlist) throw new Error("观察列表尚未加载，请稍后重试");
+        return watchlist;
+      },
+      persist: persistWatchlist,
+    }),
+    ...registerFeishuCommands(vscode, context.secrets),
   );
 
   if (repositoryRoot) {
+    loadWatchlist(repositoryRoot)
+      .then((data) => {
+        watchlist = data;
+        sidebar.refresh(watchlist);
+      })
+      .catch((error) => {
+        output.appendLine(`读取观察列表失败：${error.message}`);
+        vscode.window.showErrorMessage(`Relife 观察列表读取失败：${error.message}`);
+      });
     loadPortfolio(repositoryRoot)
       .then((data) => {
         portfolio = data;
         sendPortfolio();
       })
       .catch((error) => output.appendLine(`读取现有组合数据失败：${error.message}`));
-    refresh().catch(() => {});
-    context.subscriptions.push(scheduleUpdates(() => refresh().catch(() => {})));
+    runUpdates();
+    context.subscriptions.push(scheduleUpdates(runUpdates));
   }
 }
 

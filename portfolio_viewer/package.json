@@ -2,7 +2,7 @@
   "name": "relife-portfolio",
   "displayName": "Relife Portfolio",
   "description": "在 VS Code 中查看并定时更新 Relife 仓库的 A 股与美股投资组合。",
-  "version": "0.2.0",
+  "version": "0.4.0",
   "publisher": "clannad0710",
   "private": true,
   "license": "Apache-2.0",
@@ -46,7 +46,10 @@
   "activationEvents": [
     "onStartupFinished",
     "onCommand:relifePortfolio.open",
-    "onCommand:relifePortfolio.refresh"
+    "onCommand:relifePortfolio.refresh",
+    "onCommand:relifePortfolio.configureFeishu",
+    "onCommand:relifePortfolio.testFeishu",
+    "onView:relifePortfolio.actions"
   ],
   "contributes": {
     "viewsContainers": {
@@ -69,13 +72,122 @@
     "commands": [
       {
         "command": "relifePortfolio.open",
-        "title": "Relife: 打开投资组合"
+        "title": "Relife: 投资组合"
       },
       {
         "command": "relifePortfolio.refresh",
         "title": "Relife: 立即更新数据"
+      },
+      {
+        "command": "relifePortfolio.configureFeishu",
+        "title": "Relife: 配置或停用飞书通知"
+      },
+      {
+        "command": "relifePortfolio.testFeishu",
+        "title": "Relife: 发送飞书测试消息"
+      },
+      {
+        "command": "relifePortfolio.watchlist.addGroup",
+        "title": "Relife: 新建观察分组"
+      },
+      {
+        "command": "relifePortfolio.watchlist.renameGroup",
+        "title": "Relife: 重命名观察分组"
+      },
+      {
+        "command": "relifePortfolio.watchlist.deleteGroup",
+        "title": "Relife: 删除观察分组"
+      },
+      {
+        "command": "relifePortfolio.watchlist.moveGroupUp",
+        "title": "Relife: 分组上移"
+      },
+      {
+        "command": "relifePortfolio.watchlist.moveGroupDown",
+        "title": "Relife: 分组下移"
+      },
+      {
+        "command": "relifePortfolio.watchlist.addItem",
+        "title": "Relife: 添加观察标的"
+      },
+      {
+        "command": "relifePortfolio.watchlist.moveItem",
+        "title": "Relife: 移动观察标的"
+      },
+      {
+        "command": "relifePortfolio.watchlist.removeItem",
+        "title": "Relife: 删除观察标的"
+      },
+      {
+        "command": "relifePortfolio.watchlist.toggleItem",
+        "title": "Relife: 启用或停用观察提醒"
+      },
+      {
+        "command": "relifePortfolio.watchlist.configureItem",
+        "title": "Relife: 设置布林提醒"
       }
-    ]
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "relifePortfolio.watchlist.addGroup",
+          "when": "view == relifePortfolio.actions",
+          "group": "navigation@1"
+        },
+        {
+          "command": "relifePortfolio.configureFeishu",
+          "when": "view == relifePortfolio.actions",
+          "group": "navigation@2"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "relifePortfolio.watchlist.addItem",
+          "when": "view == relifePortfolio.actions && viewItem == relifeWatchlistGroup",
+          "group": "inline@1"
+        },
+        {
+          "command": "relifePortfolio.watchlist.renameGroup",
+          "when": "view == relifePortfolio.actions && viewItem == relifeWatchlistGroup",
+          "group": "watchlist@1"
+        },
+        {
+          "command": "relifePortfolio.watchlist.deleteGroup",
+          "when": "view == relifePortfolio.actions && viewItem == relifeWatchlistGroup",
+          "group": "watchlist@2"
+        },
+        {
+          "command": "relifePortfolio.watchlist.moveGroupUp",
+          "when": "view == relifePortfolio.actions && viewItem == relifeWatchlistGroup",
+          "group": "watchlist-order@1"
+        },
+        {
+          "command": "relifePortfolio.watchlist.moveGroupDown",
+          "when": "view == relifePortfolio.actions && viewItem == relifeWatchlistGroup",
+          "group": "watchlist-order@2"
+        },
+        {
+          "command": "relifePortfolio.watchlist.configureItem",
+          "when": "view == relifePortfolio.actions && viewItem =~ /relifeWatchlistItem/",
+          "group": "inline@1"
+        },
+        {
+          "command": "relifePortfolio.watchlist.toggleItem",
+          "when": "view == relifePortfolio.actions && viewItem =~ /relifeWatchlistItem/",
+          "group": "watchlist@1"
+        },
+        {
+          "command": "relifePortfolio.watchlist.moveItem",
+          "when": "view == relifePortfolio.actions && viewItem =~ /relifeWatchlistItem/",
+          "group": "watchlist@2"
+        },
+        {
+          "command": "relifePortfolio.watchlist.removeItem",
+          "when": "view == relifePortfolio.actions && viewItem =~ /relifeWatchlistItem/",
+          "group": "watchlist@3"
+        }
+      ]
+    }
   },
   "files": [
     "media/icon.png",
@@ -84,6 +196,9 @@
     "vscode/portfolio.cjs",
     "vscode/schedule.cjs",
     "vscode/sidebar.cjs",
+    "vscode/watchlist.cjs",
+    "vscode/watchlist-editor.cjs",
+    "vscode/alerts.cjs",
     "vscode/dist/**",
     "README.md"
   ],
@@ -97,7 +212,7 @@
     "portfolio:data": "/home/clannad/miniforge3/envs/istorm_rag_gpu/bin/python scripts/generate_portfolio_dashboard.py",
     "portfolio:update": "npm run portfolio:data && npm run build",
     "vscode:build": "vite build --config vscode/vite.config.ts",
-    "vscode:test": "node --test tests/vscode-portfolio.test.mjs tests/vscode-schedule.test.mjs tests/vscode-sidebar.test.mjs tests/vscode-webview.test.mjs tests/vscode-refresh-control.test.mjs tests/vscode-extension.test.mjs",
+    "vscode:test": "node --test tests/vscode-portfolio.test.mjs tests/vscode-schedule.test.mjs tests/vscode-sidebar.test.mjs tests/vscode-watchlist.test.mjs tests/vscode-watchlist-editor.test.mjs tests/vscode-alerts.test.mjs tests/vscode-webview.test.mjs tests/vscode-refresh-control.test.mjs tests/vscode-extension.test.mjs",
     "vscode:package:test": "node --test tests/vscode-package.test.mjs",
     "vscode:package": "npm run vscode:test && npm run vscode:build && npm run vscode:package:test && node node_modules/@vscode/vsce/vsce package",
     "vscode:prepublish": "npm run vscode:build"

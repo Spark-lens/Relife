@@ -1,0 +1,325 @@
+{
+  "groups": [
+    {
+      "id": "cashflow",
+      "label": "现金流",
+      "items": [
+        {
+          "market": "us",
+          "symbol": "BOXX",
+          "name": "短债",
+          "bollinger": {
+            "enabled": true,
+            "timeframes": [
+              "daily",
+              "weekly",
+              "monthly"
+            ],
+            "window": 20,
+            "standardDeviations": 2
+          }
+        }
+      ]
+    },
+    {
+      "id": "broad-market",
+      "label": "大盘",
+      "items": [
+        {
+          "market": "us",
+          "symbol": "QQQ",
+          "name": "纳斯达克100 ETF",
+          "bollinger": {
+            "enabled": true,
+            "timeframes": [
+              "daily",
+              "weekly",
+              "monthly"
+            ],
+            "window": 20,
+            "standardDeviations": 2
+          }
+        },
+        {
+          "market": "cn",
+          "symbol": "512100",
+          "name": "中证1000 ETF",
+          "bollinger": {
+            "enabled": true,
+            "timeframes": [
+              "daily",
+              "weekly",
+              "monthly"
+            ],
+            "window": 20,
+            "standardDeviations": 2
+          }
+        },
+        {
+          "market": "cn",
+          "symbol": "159915",
+          "name": "创业板 ETF",
+          "bollinger": {
+            "enabled": true,
+            "timeframes": [
+              "daily",
+              "weekly",
+              "monthly"
+            ],
+            "window": 20,
+            "standardDeviations": 2
+          }
+        }
+      ]
+    },
+    {
+      "id": "dividend",
+      "label": "股息",
+      "items": [
+        {
+          "market": "us",
+          "symbol": "XQQI",
+          "name": "期权股息",
+          "bollinger": {
+            "enabled": true,
+            "timeframes": [
+              "daily",
+              "weekly",
+              "monthly"
+            ],
+            "window": 20,
+            "standardDeviations": 2
+          }
+        },
+        {
+          "market": "us",
+          "symbol": "QQQI",
+          "name": "期权股息",
+          "bollinger": {
+            "enabled": true,
+            "timeframes": [
+              "daily",
+              "weekly",
+              "monthly"
+            ],
+            "window": 20,
+            "standardDeviations": 2
+          }
+        },
+        {
+          "market": "us",
+          "symbol": "SCHD",
+          "name": "红利股息",
+          "bollinger": {
+            "enabled": true,
+            "timeframes": [
+              "daily",
+              "weekly",
+              "monthly"
+            ],
+            "window": 20,
+            "standardDeviations": 2
+          }
+        },
+        {
+          "market": "cn",
+          "symbol": "513530",
+          "name": "港股红利",
+          "bollinger": {
+            "enabled": true,
+            "timeframes": [
+              "daily",
+              "weekly",
+              "monthly"
+            ],
+            "window": 20,
+            "standardDeviations": 2
+          }
+        }
+      ]
+    },
+    {
+      "id": "stock",
+      "label": "个股",
+      "items": [
+        {
+          "market": "us",
+          "symbol": "BRK.B",
+          "name": "伯克希尔",
+          "bollinger": {
+            "enabled": true,
+            "timeframes": [
+              "daily",
+              "weekly",
+              "monthly"
+            ],
+            "window": 20,
+            "standardDeviations": 2
+          }
+        },
+        {
+          "market": "us",
+          "symbol": "KO",
+          "name": "可口可乐",
+          "bollinger": {
+            "enabled": true,
+            "timeframes": [
+              "daily",
+              "weekly",
+              "monthly"
+            ],
+            "window": 20,
+            "standardDeviations": 2
+          }
+        },
+        {
+          "market": "us",
+          "symbol": "GOOGL",
+          "name": "Alphabet",
+          "bollinger": {
+            "enabled": true,
+            "timeframes": [
+              "daily",
+              "weekly",
+              "monthly"
+            ],
+            "window": 20,
+            "standardDeviations": 2
+          }
+        },
+        {
+          "market": "us",
+          "symbol": "JD",
+          "name": "京东",
+          "bollinger": {
+            "enabled": true,
+            "timeframes": [
+              "daily",
+              "weekly",
+              "monthly"
+            ],
+            "window": 20,
+            "standardDeviations": 2
+          }
+        }
+      ]
+    },
+    {
+      "id": "leverage",
+      "label": "杠杆",
+      "items": [
+        {
+          "market": "us",
+          "symbol": "SOXL",
+          "name": "半导体做多",
+          "bollinger": {
+            "enabled": true,
+            "timeframes": [
+              "daily",
+              "weekly",
+              "monthly"
+            ],
+            "window": 20,
+            "standardDeviations": 2
+          }
+        },
+        {
+          "market": "us",
+          "symbol": "SOXS",
+          "name": "半导体做空",
+          "bollinger": {
+            "enabled": true,
+            "timeframes": [
+              "daily",
+              "weekly",
+              "monthly"
+            ],
+            "window": 20,
+            "standardDeviations": 2
+          }
+        },
+        {
+          "market": "us",
+          "symbol": "YINN",
+          "name": "中国做多",
+          "bollinger": {
+            "enabled": true,
+            "timeframes": [
+              "daily",
+              "weekly",
+              "monthly"
+            ],
+            "window": 20,
+            "standardDeviations": 2
+          }
+        },
+        {
+          "market": "us",
+          "symbol": "YANG",
+          "name": "中国做空",
+          "bollinger": {
+            "enabled": true,
+            "timeframes": [
+              "daily",
+              "weekly",
+              "monthly"
+            ],
+            "window": 20,
+            "standardDeviations": 2
+          }
+        },
+        {
+          "market": "us",
+          "symbol": "TQQQ",
+          "name": "纳指做多",
+          "bollinger": {
+            "enabled": true,
+            "timeframes": [
+              "daily",
+              "weekly",
+              "monthly"
+            ],
+            "window": 20,
+            "standardDeviations": 2
+          }
+        },
+        {
+          "market": "us",
+          "symbol": "SQQQ",
+          "name": "纳指做空",
+          "bollinger": {
+            "enabled": true,
+            "timeframes": [
+              "daily",
+              "weekly",
+              "monthly"
+            ],
+            "window": 20,
+            "standardDeviations": 2
+          }
+        }
+      ]
+    },
+    {
+      "id": "bitcoin",
+      "label": "比特币",
+      "items": [
+        {
+          "market": "us",
+          "symbol": "IBIT",
+          "name": "比特币 ETF",
+          "bollinger": {
+            "enabled": true,
+            "timeframes": [
+              "daily",
+              "weekly",
+              "monthly"
+            ],
+            "window": 20,
+            "standardDeviations": 2
+          }
+        }
+      ]
+    }
+  ]
+}

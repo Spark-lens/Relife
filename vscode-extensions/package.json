@@ -1,7 +1,7 @@
 {
   "name": "relife",
   "displayName": "Relife",
-  "description": "TradingView 风格的双市场投资组合与策略工作台。",
+  "description": "TradingView 风格的纯前端双市场投资组合与策略工作台。",
   "version": "0.0.1",
   "publisher": "clannad0710",
   "private": true,
@@ -25,30 +25,20 @@
       {"command": "relife.resetSources", "title": "Relife: 恢复示例数据"},
       {"command": "relife.refresh", "title": "Relife: 刷新数据"}
     ],
-    "menus": {"view/title": [{"command": "relife.refresh", "when": "view == relife.sidebar", "group": "navigation@1"}]},
-    "configuration": {
-      "title": "Relife",
-      "properties": {
-        "relife.pythonPath": {
-          "type": "string",
-          "default": "",
-          "description": "运行 Relife 数据引擎的 Python 3.12 解释器路径。留空时插件启动会自动检测 conda 环境（优先 istorm_rag_gpu）并回填此配置；检测不到时会弹窗引导手动指定。"
-        }
-      }
-    }
+    "menus": {"view/title": [{"command": "relife.refresh", "when": "view == relife.sidebar", "group": "navigation@1"}]}
   },
   "files": [
-    "extension.cjs", "src/*.mjs", "src/webview-html.cjs", "dist/**", "python/**",
+    "extension.cjs", "src/*.mjs", "src/webview-html.cjs", "dist/**",
     "resources/sample/**", "media/**", "README.md", "LICENSE"
   ],
   "scripts": {
     "test:node": "node --test tests/node/*.test.mjs",
-    "test:python": "python3 -m unittest discover -s tests/python -v",
-    "test": "npm run test:node && npm run test:python",
+    "test": "npm run test:node",
     "build": "vite build",
     "package:check": "npm test && npm run build",
     "package": "npm run package:check && vsce package --out clannad0710.relife-0.0.1.vsix",
     "package:quick": "npm run build && vsce package --out clannad0710.relife-0.0.1.vsix",
+    "package:local": "node scripts/package-vsix.mjs",
     "vscode:prepublish": "npm run build"
   },
   "dependencies": {

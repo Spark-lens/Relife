@@ -1,7 +1,7 @@
 import path from "node:path";
 
 const REQUESTS = new Set([
-  "ready", "refresh", "select-source", "reset-source", "open-portfolio", "open-strategy",
+  "ready", "refresh", "select-source", "reset-source", "open-portfolio", "open-watchlist", "open-strategy",
   "watchlist-add-category", "watchlist-rename-category", "watchlist-delete-category",
   "watchlist-move-category", "watchlist-add-symbol", "watchlist-edit-symbol",
   "watchlist-delete-symbol", "watchlist-move-symbol", "open-strategy-file",

@@ -9,6 +9,7 @@ venv/
 .env
 .venv
 .tests/
+.pytest_cache
 
 # Node / Sites
 node_modules/
@@ -16,10 +17,13 @@ node_modules/
 .vinext/
 .wrangler/
 dist/
+*.tsbuildinfo
 
 # agent
 .agents/
 .codex/
+.codebuddy/
+.superpowers/
 
 # IDE
 # .vscode/
@@ -27,3 +31,8 @@ dist/
 # 其他
 *.log
 .DS_Store
+.docs/tradingview-picture/
+.docs/
+docs/tradingview-picture/
+vscode-extensions/debug/*.png
+vscode-extensions_old/**/*.svg

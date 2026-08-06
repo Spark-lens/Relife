@@ -6,10 +6,20 @@ declare function acquireVsCodeApi(): { postMessage(message: unknown): void };
 const vscode = acquireVsCodeApi();
 const post = (type: string, data: Record<string, unknown> = {}) => vscode.postMessage({ type, ...data });
 
-type AppState = { snapshot: any; watchlist: any; sources: any; refresh: any; error: any };
+type AppState = {
+  snapshot: any;
+  watchlist: any;
+  sources: any;
+  refresh: any;
+  error: any;
+  content: { view: "portfolio" | "watchlist"; title?: string; symbol?: string };
+};
 
 function useHostState(): AppState {
-  const [state, setState] = useState<AppState>({ snapshot: null, watchlist: null, sources: null, refresh: null, error: null });
+  const [state, setState] = useState<AppState>({
+    snapshot: null, watchlist: null, sources: null, refresh: null, error: null,
+    content: { view: "portfolio" },
+  });
   useEffect(() => {
     const listener = (event: MessageEvent) => {
       const message = event.data;
@@ -18,6 +28,7 @@ function useHostState(): AppState {
       if (message.type === "source-status") setState((old) => ({ ...old, sources: message.data }));
       if (message.type === "refresh-status") setState((old) => ({ ...old, refresh: message }));
       if (message.type === "error") setState((old) => ({ ...old, error: message }));
+      if (message.type === "content-view") setState((old) => ({ ...old, content: message.data || { view: "portfolio" } }));
     };
     window.addEventListener("message", listener);
     post("ready");
@@ -37,8 +48,10 @@ const signed = (value: number | null | undefined, suffix = "") => value == null 
 const percent = (value: number | null | undefined) => value == null ? "—" : `${value >= 0 ? "+" : ""}${number(value * 100)}%`;
 const tone = (value: number | null | undefined) => value == null || value === 0 ? "flat" : value > 0 ? "up" : "down";
 
-function DashboardIcon() {
-  return <svg className="dashboard-icon" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 11a6 6 0 0 1 12 0M8 8l3-2M3.5 12.5h9" /></svg>;
+function SymbolIcon({ item }: { item: any }) {
+  if (typeof item.icon === "string" && item.icon) return <img className="symbol-icon own" src={item.icon} alt="" />;
+  const market = item.market === "cn" ? "cn" : item.market === "us" ? "us" : "fallback";
+  return <span className={`symbol-icon ${market}`} aria-label={market === "cn" ? "中国市场" : market === "us" ? "美国市场" : "默认市场图标"} />;
 }
 
 function Sidebar({ state }: { state: AppState }) {
@@ -48,6 +61,8 @@ function Sidebar({ state }: { state: AppState }) {
     for (const market of ["us", "cn"]) for (const row of state.snapshot?.markets?.[market]?.prices || []) map.set(`${market}:${row.symbol}`.toUpperCase(), row);
     return map;
   }, [state.snapshot]);
+  const [expanded, setExpanded] = useState<Record<string, boolean>>({ home: true, symbols: true, strategy: true });
+  const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
   const [pending, setPending] = useState<{ key: string; categoryId: string } | null>(null);
   useEffect(() => {
     if (state.error?.code === "DUPLICATE_SYMBOL" && pending && window.confirm("该标的已存在。是否移动到目标分类？")) {
@@ -66,39 +81,64 @@ function Sidebar({ state }: { state: AppState }) {
     post("watchlist-add-symbol", { categoryId, symbol: { market, symbol, name, note } });
   };
   const moveSymbol = (key: string, categoryId: string, index: number) => post("watchlist-move-symbol", { key, targetCategoryId: categoryId, targetIndex: index });
+  const toggle = (key: string) => setExpanded((old) => ({ ...old, [key]: !old[key] }));
+  const toggleCategory = (key: string) => setExpandedCategories((old) => ({ ...old, [key]: old[key] === false }));
+  const editItem = (item: any) => {
+    const market = window.prompt("市场：us 或 cn", item.market); if (!market) return;
+    const symbol = window.prompt("标的代码", item.symbol); if (!symbol) return;
+    const name = window.prompt("中文名称", item.name); if (name == null) return;
+    const note = window.prompt("备注（留空则显示中文名称）", item.note || "");
+    post("watchlist-edit-symbol", { key: item.key, symbol: { market, symbol, name, note: note ?? item.note } });
+  };
+  const rootRow = (key: string, label: string, action?: React.ReactNode) => <div className="tree-head">
+    <button className="tree-row root-row" onClick={() => toggle(key)}><span className={`tree-chevron ${expanded[key] ? "expanded" : ""}`} aria-hidden="true" />{label}</button>
+    {action}
+  </div>;
   return <aside className="sidebar">
-    <section><h2>HOME</h2><button className="nav-item portfolio-link" onClick={() => post("open-portfolio")}><DashboardIcon /><span>投资组合</span></button></section>
-    <section>
-      <div className="section-title"><h2>标的</h2><button title="新建分类" aria-label="新建分类" onClick={addCategory}>＋</button></div>
-      <div className="watch-head"><span>商品</span><span>最新价</span><span className="change-amount">涨跌</span><span>涨跌%</span></div>
-      {watchlist.categories.map((category: any, categoryIndex: number) => <details key={category.id} open onDragOver={(event) => event.preventDefault()} onDrop={(event) => moveSymbol(event.dataTransfer.getData("text/plain"), category.id, category.symbols.length)}>
-        <summary>
-          <span title={category.name}>{category.name}</span>
-          <span className="row-actions">
-            <button title="新增标的" onClick={(event) => { event.preventDefault(); addSymbol(category.id); }}>＋</button>
-            <button title="重命名" onClick={(event) => { event.preventDefault(); const name = window.prompt("分类名称", category.name); if (name) post("watchlist-rename-category", { categoryId: category.id, name }); }}>✎</button>
-            <button title="上移" disabled={!categoryIndex} onClick={(event) => { event.preventDefault(); post("watchlist-move-category", { categoryId: category.id, offset: -1 }); }}>↑</button>
-            <button title="下移" disabled={categoryIndex === watchlist.categories.length - 1} onClick={(event) => { event.preventDefault(); post("watchlist-move-category", { categoryId: category.id, offset: 1 }); }}>↓</button>
-            <button title="删除分类" onClick={(event) => { event.preventDefault(); if (window.confirm(`删除“${category.name}”及其标的？`)) post("watchlist-delete-category", { categoryId: category.id }); }}>×</button>
-          </span>
-        </summary>
-        {category.symbols.map((item: any, index: number) => {
-          const price = prices.get(item.key.toUpperCase());
-          return <div className="watch-row" key={item.key} draggable onDragStart={(event) => event.dataTransfer.setData("text/plain", item.key)} onDragOver={(event) => event.preventDefault()} onDrop={(event) => { event.stopPropagation(); moveSymbol(event.dataTransfer.getData("text/plain"), category.id, index); }}>
-            <div className="commodity"><strong>{item.symbol}</strong><div><span className="watch-name" title={item.name}>{item.name}</span><span className="watch-note" title={item.note}>{item.note}</span></div></div>
-            <span>{number(price?.latest)}</span><span className={`change-amount ${tone(price?.change)}`}>{signed(price?.change)}</span><span className={tone(price?.changePercent)}>{percent(price?.changePercent)}</span>
-            <div className="symbol-actions">
-              <button title="编辑" onClick={() => { const market = window.prompt("市场：us 或 cn", item.market); if (!market) return; const symbol = window.prompt("标的代码", item.symbol); if (!symbol) return; const name = window.prompt("中文名称", item.name); if (name == null) return; const note = window.prompt("备注", item.note) ?? item.note; post("watchlist-edit-symbol", { key: item.key, symbol: { market, symbol, name, note } }); }}>✎</button>
-              <button title="上移" disabled={!index} onClick={() => moveSymbol(item.key, category.id, index - 1)}>↑</button>
-              <button title="下移" disabled={index === category.symbols.length - 1} onClick={() => moveSymbol(item.key, category.id, index + 1)}>↓</button>
-              <select aria-label={`移动 ${item.symbol} 到分类`} value="" onChange={(event) => { if (event.target.value) moveSymbol(item.key, event.target.value, 9999); }}><option value="">移动到…</option>{watchlist.categories.filter((entry: any) => entry.id !== category.id).map((entry: any) => <option key={entry.id} value={entry.id}>{entry.name}</option>)}</select>
-              <button title="删除" onClick={() => { if (window.confirm(`删除 ${item.symbol}？`)) post("watchlist-delete-symbol", { key: item.key }); }}>×</button>
+    <section className="tree-section">
+      {rootRow("home", "HOME")}
+      {expanded.home && <div className="tree-children"><button className="tree-row leaf-row" onClick={() => post("open-portfolio")}><span className="tree-indent" />投资组合</button></div>}
+    </section>
+    <section className="tree-section">
+      {rootRow("symbols", "标的", <button className="tree-action" title="新建分类" aria-label="新建分类" onClick={addCategory}>＋</button>)}
+      {expanded.symbols && <div className="tree-children">
+        {watchlist.categories.map((category: any, categoryIndex: number) => {
+          const isOpen = expandedCategories[category.id] !== false;
+          return <div className="category-group" key={category.id} onDragOver={(event) => event.preventDefault()} onDrop={(event) => moveSymbol(event.dataTransfer.getData("text/plain"), category.id, category.symbols.length)}>
+            <div className="tree-row category-row" onClick={() => post("open-watchlist", { title: category.name })}>
+              <button className={`tree-chevron ${isOpen ? "expanded" : ""}`} aria-label={`${isOpen ? "收起" : "展开"}${category.name}`} onClick={(event) => { event.stopPropagation(); toggleCategory(category.id); }} />
+              <span className="tree-label" title={category.name}>{category.name}</span>
+              <span className="row-actions">
+                <button title="新增标的" onClick={(event) => { event.stopPropagation(); addSymbol(category.id); }}>＋</button>
+                <button title="重命名" onClick={(event) => { event.stopPropagation(); const name = window.prompt("分类名称", category.name); if (name) post("watchlist-rename-category", { categoryId: category.id, name }); }}>✎</button>
+                <button title="上移" disabled={!categoryIndex} onClick={(event) => { event.stopPropagation(); post("watchlist-move-category", { categoryId: category.id, offset: -1 }); }}>↑</button>
+                <button title="下移" disabled={categoryIndex === watchlist.categories.length - 1} onClick={(event) => { event.stopPropagation(); post("watchlist-move-category", { categoryId: category.id, offset: 1 }); }}>↓</button>
+                <button title="删除分类" onClick={(event) => { event.stopPropagation(); if (window.confirm(`删除“${category.name}”及其标的？`)) post("watchlist-delete-category", { categoryId: category.id }); }}>×</button>
+              </span>
             </div>
+            {isOpen && category.symbols.map((item: any, index: number) => {
+              const price = prices.get(item.key.toUpperCase()) || item;
+              const latest = Number.isFinite(price?.latest) ? price.latest : 100;
+              const changePercent = Number.isFinite(price?.changePercent) ? price.changePercent : 0.01;
+              const label = String(item.note || "").trim() || item.name || item.symbol;
+              return <div className="tree-row symbol-row" key={item.key} draggable onDragStart={(event) => event.dataTransfer.setData("text/plain", item.key)} onDragOver={(event) => event.preventDefault()} onDrop={(event) => { event.stopPropagation(); moveSymbol(event.dataTransfer.getData("text/plain"), category.id, index); }} onClick={() => post("open-watchlist", { title: label, symbol: item.symbol })}>
+                <SymbolIcon item={item} />
+                <span className="symbol-label"><strong>{item.symbol}</strong><small title={label}>{label}</small></span>
+                <span className="symbol-metrics"><b>{number(latest)}</b><em className={tone(changePercent)}>{percent(changePercent)}</em></span>
+                <span className="symbol-actions">
+                  <button title="编辑备注" onClick={(event) => { event.stopPropagation(); editItem(item); }}>✎</button>
+                  <button title="删除" onClick={(event) => { event.stopPropagation(); if (window.confirm(`删除 ${item.symbol}？`)) post("watchlist-delete-symbol", { key: item.key }); }}>×</button>
+                </span>
+              </div>;
+            })}
           </div>;
         })}
-      </details>)}
+      </div>}
     </section>
-    <section><h2>策略</h2><button className="nav-item" onClick={() => post("open-strategy")}>布林带策略</button></section>
+    <section className="tree-section">
+      {rootRow("strategy", "策略")}
+      {expanded.strategy && <div className="tree-children"><button className="tree-row leaf-row" onClick={() => post("open-strategy")}><span className="tree-indent" />布林带策略<span className="readonly-label">只读</span></button></div>}
+    </section>
     {state.error && <div className="side-error">{state.error.message}</div>}
   </aside>;
 }
@@ -323,10 +363,10 @@ const TAB_MAP: Record<string, string[]> = {
 function SummaryCards({ market }: { market: any }) {
   const summary = market.summary;
   return <div className="summary-grid">
-    <article><span>投资组合价值</span><strong>{money(summary.portfolioValue, market.currency)}</strong><small><span>现金</span><span>{money(summary.cash, market.currency)}</span></small></article>
-    <article><span>未实现收益</span><strong className={tone(summary.unrealized)}>{money(summary.unrealized, market.currency)}</strong><small><span>最后一天</span><span className={tone(summary.lastDayAmount)}>{money(summary.lastDayAmount, market.currency)} · {percent(summary.lastDayPercent)}</span></small></article>
-    <article className="realized-card"><div><span>已实现收益</span><strong className={tone(summary.realized)}>{money(summary.realized, market.currency)}</strong></div><div className="realized-detail"><small><span>交易收益</span><b className={tone(summary.tradingRealized)}>{money(summary.tradingRealized, market.currency)}</b></small><small><span>净股息</span><b className={tone(summary.netDividends)}>{money(summary.netDividends, market.currency)}</b></small></div></article>
-    <article><span>总收益</span><strong className={tone(summary.totalReturn)}>{money(summary.totalReturn, market.currency)} <em>{percent(summary.totalReturnRate)}</em></strong><small><span>年化收益率</span><span>{percent(summary.annualizedReturn)}</span></small></article>
+    <article><span>投资组合价值</span><strong>{money(summary.portfolioValue, market.currency)}</strong><div className="summary-subline"><span>现金</span><b>{money(summary.cash, market.currency)}</b></div></article>
+    <article><span>未实现收益</span><strong className={tone(summary.unrealized)}>{money(summary.unrealized, market.currency)}</strong><div className="summary-subline"><span>最后一天</span><b className={tone(summary.lastDayAmount)}>{money(summary.lastDayAmount, market.currency)} · {percent(summary.lastDayPercent)}</b></div></article>
+    <article><span>已实现收益</span><strong className={tone(summary.realized)}>{money(summary.realized, market.currency)}</strong><div className="summary-subline"><span>净股息</span><b className={tone(summary.netDividends)}>{money(summary.netDividends, market.currency)}</b></div></article>
+    <article><span>总收益</span><strong className={tone(summary.totalReturn)}>{money(summary.totalReturn, market.currency)}</strong><div className="summary-subline"><span>年化收益率</span><b className={tone(summary.annualizedReturn)}>{percent(summary.annualizedReturn)}</b></div></article>
   </div>;
 }
 
@@ -341,8 +381,8 @@ function Metric({ label, value }: { label: string; value: string }) { return <ar
 function Calendar({ rows, currency }: { rows: any[]; currency: string }) { return rows?.length ? <div className="calendar">{rows.map((row, index) => <div key={`${row.date}-${row.symbol}-${index}`}><time>{row.date}</time><strong>{row.symbol}</strong><span>{row.status}</span><b>{money(row.amount, currency)}</b></div>)}</div> : <div className="empty">暂无派息日历</div>; }
 
 function Content({ tab, subtab, market, showSold, setShowSold, chartRange, setChartRange, sortKey, sortDir, onSort }: any) {
-  if (tab === "概览" && subtab === "值") return <><div className="panel"><LineChart curve={market.curve} mode="value" secondKey="flow" secondLabel="自由现金" range={chartRange} onRangeChange={setChartRange}/></div><div className="overview-grid"><section className="panel"><h3>资产分布</h3><Donut rows={market.distribution}/></section><section className="panel"><h3>派息监控</h3><Calendar rows={market.dividendCalendar} currency={market.currency}/></section></div></>;
-  if (tab === "概览") return <div className="panel"><LineChart curve={market.curve} mode="percent" secondKey="benchmark" secondLabel={market.benchmark.name} range={chartRange} onRangeChange={setChartRange}/></div>;
+  if (tab === "概览" && subtab === "值") return <><section className="chart-panel"><div className="chart-caption"><span>投资组合</span><span>自由现金</span></div><LineChart curve={market.curve} mode="value" secondKey="flow" secondLabel="自由现金" range={chartRange} onRangeChange={setChartRange}/></section><div className="overview-grid"><section className="panel"><h3>资产分布</h3><Donut rows={market.distribution}/></section><section className="panel"><h3>派息监控</h3><Calendar rows={market.dividendCalendar} currency={market.currency}/></section></div></>;
+  if (tab === "概览") return <section className="chart-panel"><div className="chart-caption"><span>投资组合</span><span>{market.benchmark.name}</span></div><LineChart curve={market.curve} mode="percent" secondKey="benchmark" secondLabel={market.benchmark.name} range={chartRange} onRangeChange={setChartRange}/></section>;
   if (tab === "控股" && subtab === "价格") return <DataTable rows={market.prices} kind="prices" currency={market.currency} sortKey={sortKey} sortDir={sortDir} onSort={onSort}/>;
   if (tab === "控股") return <><label className="sold-toggle"><input type="checkbox" checked={showSold} onChange={(event) => setShowSold(event.target.checked)}/> 显示已卖出标的</label><DataTable rows={[...market.holdings, ...(showSold ? market.soldHoldings || [] : [])]} kind="holdings" currency={market.currency} sortKey={sortKey} sortDir={sortDir} onSort={onSort}/></>;
   if (tab === "交易") return <DataTable rows={subtab === "现金" ? market.cashTransactions : subtab === "股息" ? market.dividends : market.transactions} kind="transactions" currency={market.currency} sortKey={sortKey} sortDir={sortDir} onSort={onSort}/>;
@@ -351,29 +391,34 @@ function Content({ tab, subtab, market, showSold, setShowSold, chartRange, setCh
 
 function Portfolio({ state }: { state: AppState }) {
   const [marketKey, setMarketKey] = useState("us");
-  const [tab, setTab] = useState("控股");
-  const [subtab, setSubtab] = useState("持仓");
+  const [tab, setTab] = useState("概览");
+  const [subtab, setSubtab] = useState("值");
   const [showSold, setShowSold] = useState(false);
   const [chartRange, setChartRange] = useState("all");
   const [sortKey, setSortKey] = useState("");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
   const market = state.snapshot?.markets?.[marketKey];
+  if (state.content.view === "watchlist") {
+    return <main className="content-placeholder"><span className="eyebrow">标的 · 只读展示</span><h1>{state.content.title || "标的"}</h1><p>当前先保留目录、中文名称和行情入口；标的详情、走势图与指标将在后续版本接入。</p><span className="readonly-pill">后续开发</span></main>;
+  }
   if (!market) return <div className="loading">正在读取投资组合…</div>;
   const chooseTab = (next: string) => { setTab(next); setSubtab(TAB_MAP[next][0]); setSortKey(""); setSortDir("desc"); };
   const handleSort = (key: string) => {
     if (sortKey === key) setSortDir((prev) => prev === "asc" ? "desc" : "asc");
     else { setSortKey(key); setSortDir("desc"); }
   };
-  return <main className="portfolio">
-    <header className="topbar">
-      <div><select className="market-select" value={marketKey} onChange={(event) => { setMarketKey(event.target.value); setTab("控股"); setSubtab("持仓"); setShowSold(false); setChartRange("all"); }}><option value="us">美股持仓</option><option value="cn">A股持仓</option></select>{market.source.mode === "sample" && <span className="sample-badge">示例数据</span>}{market.incomplete && <span className="warning-badge">数据不完整</span>}</div>
-      <div className="toolbar"><button onClick={() => post("select-source", { market: marketKey })}>选择文件</button><button onClick={() => post("reset-source", { market: marketKey })}>恢复示例</button><button onClick={() => post("refresh")} disabled={state.refresh?.status === "loading"}>{state.refresh?.status === "loading" ? "刷新中…" : "刷新"}</button></div>
+  return <main className="portfolio-v2">
+    <header className="workbench-head">
+      <div className="market-tabs" role="tablist" aria-label="市场切换">
+        <button className={marketKey === "us" ? "active" : ""} role="tab" aria-selected={marketKey === "us"} onClick={() => { setMarketKey("us"); setTab("概览"); setSubtab("值"); setShowSold(false); setChartRange("all"); }}>美股持仓</button>
+        <button className={marketKey === "cn" ? "active" : ""} role="tab" aria-selected={marketKey === "cn"} onClick={() => { setMarketKey("cn"); setTab("概览"); setSubtab("值"); setShowSold(false); setChartRange("all"); }}>A 股持仓</button>
+      </div>
+      <div className="workbench-actions"><span className="asof">截至 {market.asOf || "—"} · {market.source?.label || "示例数据"}{market.incomplete && <span className="warning-badge">数据不完整</span>}</span><div className="toolbar"><button onClick={() => post("select-source", { market: marketKey })}>选择文件</button><button className="primary" onClick={() => post("refresh")} disabled={state.refresh?.status === "loading"}>{state.refresh?.status === "loading" ? "刷新中…" : "刷新"}</button></div></div>
     </header>
     {state.refresh?.status === "error" && <div className="error-banner">刷新失败：{state.refresh.message}；继续显示 {state.refresh.staleAt || market.asOf} 的数据。</div>}
-    <div className="asof">截至 {market.asOf || "—"} · {market.source.label}</div>
     <SummaryCards market={market}/>
     <nav className="main-tabs">{Object.keys(TAB_MAP).map((name) => <button className={tab === name ? "active" : ""} onClick={() => chooseTab(name)} key={name}>{name}</button>)}</nav>
-    <nav className="sub-tabs">{TAB_MAP[tab].map((name) => <button className={subtab === name ? "active" : ""} onClick={() => setSubtab(name)} key={name}>{name}</button>)}</nav>
+    <div className="subbar"><nav className="sub-tabs">{TAB_MAP[tab].map((name) => <button className={subtab === name ? "active" : ""} onClick={() => setSubtab(name)} key={name}>{name}</button>)}</nav><span className="subbar-asof">投资组合 · {market.benchmark.name}</span></div>
     <Content tab={tab} subtab={subtab} market={market} showSold={showSold} setShowSold={setShowSold} chartRange={chartRange} setChartRange={setChartRange} sortKey={sortKey} sortDir={sortDir} onSort={handleSort}/>
   </main>;
 }

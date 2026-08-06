@@ -31,7 +31,7 @@
       "cashTransactions": [{"date": "2026-01-03", "symbol": "", "name": "", "kind": "deposit", "action": "Deposit", "quantity": 10000, "price": 0, "fee": 0, "amount": 10000, "balance": null}],
       "dividends": [{"date": "2026-07-28", "symbol": "LUMA", "name": "流明消费（示例）", "kind": "dividend", "action": "Dividend", "quantity": 124, "price": 0, "fee": 0, "amount": 124, "balance": null}],
       "dividendCalendar": [{"date": "2026-08-18", "symbol": "ORBT", "amount": 0.42, "status": "预计除息"}, {"date": "2026-09-03", "symbol": "LUMA", "amount": 0.31, "status": "预计除息"}],
-      "curve": [{"date": "2026-02-01", "portfolio": 100, "benchmark": 100}, {"date": "2026-03-01", "portfolio": 102.8, "benchmark": 101.2}, {"date": "2026-04-01", "portfolio": 99.6, "benchmark": 98.7}, {"date": "2026-05-01", "portfolio": 105.4, "benchmark": 103.1}, {"date": "2026-06-01", "portfolio": 109.2, "benchmark": 105.8}, {"date": "2026-07-31", "portfolio": 111.42, "benchmark": 107.4}],
+      "curve": [{"date": "2026-02-01", "portfolio": 112600, "flow": 12000, "benchmark": 100}, {"date": "2026-03-01", "portfolio": 116400, "flow": 13100, "benchmark": 101.2}, {"date": "2026-04-01", "portfolio": 113800, "flow": 14200, "benchmark": 98.7}, {"date": "2026-05-01", "portfolio": 119500, "flow": 15300, "benchmark": 103.1}, {"date": "2026-06-01", "portfolio": 124900, "flow": 16900, "benchmark": 105.8}, {"date": "2026-07-31", "portfolio": 128452.38, "flow": 18400, "benchmark": 107.4}],
       "distribution": [{"symbol": "NOVA", "name": "新星科技（示例）", "value": 48092}, {"symbol": "ORBT", "name": "轨道能源（示例）", "value": 33658.2}, {"symbol": "LUMA", "name": "流明消费（示例）", "value": 32302}],
       "risk": {"beta": 0.94, "sharpe": 1.18, "sortino": 1.71, "sampleDays": 252},
       "errors": []
@@ -63,7 +63,7 @@
       "cashTransactions": [{"date": "2026-01-02", "symbol": "", "name": "", "kind": "deposit", "action": "银行转证券", "quantity": 0, "price": 0, "fee": 0, "amount": 100000, "balance": 100000}],
       "dividends": [{"date": "2026-07-30", "symbol": "000X03", "name": "蓝湾公用（示例）", "kind": "dividend", "action": "红利入账", "quantity": 0, "price": 0, "fee": 0, "amount": 850, "balance": 62300.5}],
       "dividendCalendar": [{"date": "2026-08-22", "symbol": "600X01", "amount": 0.18, "status": "公司行动"}],
-      "curve": [{"date": "2026-02-01", "portfolio": 100, "benchmark": 100}, {"date": "2026-03-01", "portfolio": 101.2, "benchmark": 99.5}, {"date": "2026-04-01", "portfolio": 97.8, "benchmark": 96.1}, {"date": "2026-05-01", "portfolio": 103.6, "benchmark": 101.3}, {"date": "2026-06-01", "portfolio": 106.4, "benchmark": 103.8}, {"date": "2026-07-31", "portfolio": 109.3, "benchmark": 105.2}],
+      "curve": [{"date": "2026-02-01", "portfolio": 450000, "flow": 50000, "benchmark": 100}, {"date": "2026-03-01", "portfolio": 462000, "flow": 52400, "benchmark": 99.5}, {"date": "2026-04-01", "portfolio": 444000, "flow": 54700, "benchmark": 96.1}, {"date": "2026-05-01", "portfolio": 467000, "flow": 57900, "benchmark": 101.3}, {"date": "2026-06-01", "portfolio": 478500, "flow": 60200, "benchmark": 103.8}, {"date": "2026-07-31", "portfolio": 486320.5, "flow": 62300.5, "benchmark": 105.2}],
       "distribution": [{"symbol": "600X01", "name": "华光制造（示例）", "value": 222400}, {"symbol": "300X02", "name": "远山医疗器械与数字服务（示例）", "value": 141600}, {"symbol": "000X03", "name": "蓝湾公用（示例）", "value": 60000}],
       "risk": {"beta": 0.82, "sharpe": 0.91, "sortino": 1.23, "sampleDays": 248},
       "errors": []

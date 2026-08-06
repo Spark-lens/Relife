@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, "Segoe UI", "PingFang SC", sans-serif;
+      background: #1e1e1e;
+      color: #cccccc;
+      font-size: 13px;
+      padding: 20px;
+    }
+    .vscode-sidebar {
+      width: 300px;
+      background: #252526;
+      border: 1px solid #333;
+      border-radius: 4px;
+      overflow: hidden;
+      font-size: 13px;
+    }
+    .sidebar-header {
+      padding: 8px 12px;
+      font-size: 11px;
+      text-transform: uppercase;
+      color: #bbb;
+      border-bottom: 1px solid #333;
+      display: flex;
+      justify-content: space-between;
+    }
+    .row {
+      display: flex;
+      align-items: center;
+      padding: 4px 8px;
+      cursor: pointer;
+      gap: 6px;
+    }
+    .row:hover { background: #2a2d2e; }
+    .row .twisty { width: 16px; text-align: center; color: #888; font-size: 10px; }
+    .row .label { color: #fff; flex: 1; }
+    .row .desc { color: #999; font-size: 12px; text-align: right; }
+    .row.lvl1 { padding-left: 8px; font-weight: 600; }
+    .row.lvl2 { padding-left: 28px; }
+    .row.lvl3 { padding-left: 48px; }
+    .row.home { color: #4ec9b0; }
+    .note { margin-top: 20px; color: #888; font-size: 12px; line-height: 1.8; }
+  </style>
+</head>
+<body>
+  <div class="vscode-sidebar">
+    <div class="sidebar-header">
+      <span>RELIFE PORTFOLIO</span>
+      <span>⋯</span>
+    </div>
+
+    <!-- HOME (lvl1) -->
+    <div class="row lvl1">
+      <span class="twisty">▾</span>
+      <span class="label">HOME</span>
+    </div>
+    <!-- 投资组合 (lvl2) -->
+    <div class="row lvl2 home">
+      <span class="twisty"></span>
+      <span class="label">投资组合</span>
+    </div>
+
+    <!-- 观察列表 (lvl1) -->
+    <div class="row lvl1">
+      <span class="twisty">▾</span>
+      <span class="label">观察列表</span>
+    </div>
+    <!-- 大盘 - 核心 (lvl2) -->
+    <div class="row lvl2">
+      <span class="twisty">▾</span>
+      <span class="label">大盘 - 核心</span>
+    </div>
+    <!-- symbols (lvl3) -->
+    <div class="row lvl3">
+      <span class="twisty"></span>
+      <span class="label">QQQ 纳指</span>
+    </div>
+    <div class="row lvl3">
+      <span class="twisty"></span>
+      <span class="label">XQQI 期权股息</span>
+    </div>
+    <div class="row lvl3">
+      <span class="twisty"></span>
+      <span class="label">SCHD 红利股息</span>
+    </div>
+    <!-- 杠杆 - 趋势、对冲 (lvl2) -->
+    <div class="row lvl2">
+      <span class="twisty">▾</span>
+      <span class="label">杠杆 - 趋势、对冲</span>
+    </div>
+    <div class="row lvl3">
+      <span class="twisty"></span>
+      <span class="label">VIX 波动率指数</span>
+    </div>
+    <div class="row lvl3">
+      <span class="twisty"></span>
+      <span class="label">YANG 中国做空</span>
+    </div>
+    <!-- 比特币 (lvl2) -->
+    <div class="row lvl2">
+      <span class="twisty">▾</span>
+      <span class="label">比特币</span>
+    </div>
+    <div class="row lvl3">
+      <span class="twisty"></span>
+      <span class="label">IBIT 比特币 ETF</span>
+    </div>
+  </div>
+
+  <div class="note">
+    <p><strong>当前 0.4.0 侧边栏结构：</strong></p>
+    <p>HOME（一级，可折叠） → 投资组合（二级，点击打开）</p>
+    <p>观察列表（一级，可折叠） → 大盘/杠杆/比特币（二级，可折叠，右键可上移/下移） → 标的（三级）</p>
+    <p>标的行不再显示策略信息（无"美股 · 日/周"描述）</p>
+  </div>
+</body>
+</html>

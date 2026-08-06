@@ -1,14 +1,14 @@
 {
-  "generatedAt": "2026-07-26T23:40:43.518591+08:00",
+  "generatedAt": "2026-08-04T15:16:29.047736+08:00",
   "markets": {
     "us": {
       "currency": "USD",
-      "asOf": "2026-07-23",
+      "asOf": "2026-07-31",
       "summary": {
-        "totalAssets": 3083.7945730225,
-        "cumulativeReturn": 0.0150805853,
-        "unrealizedPnl": 56.7644230225,
-        "cash": 358.9316
+        "totalAssets": 3095.8164203687,
+        "cumulativeReturn": 0.0190377698,
+        "unrealizedPnl": 66.8279403687,
+        "cash": 362.38848
       },
       "performance": [
         {
@@ -697,27 +697,63 @@
         },
         {
           "date": "2026-07-20",
-          "portfolio": 101.6751113011,
+          "portfolio": 101.6691247655,
           "qqq": 112.9014428579,
           "spy": 107.622582821
         },
         {
           "date": "2026-07-21",
-          "portfolio": 101.6907136409,
+          "portfolio": 101.6964454099,
           "qqq": 114.9954499843,
           "spy": 108.5202960718
         },
         {
           "date": "2026-07-22",
-          "portfolio": 101.5876495379,
+          "portfolio": 101.5838684131,
           "qqq": 114.4082841174,
           "spy": 108.3941150332
         },
         {
           "date": "2026-07-23",
-          "portfolio": 101.5080585337,
+          "portfolio": 101.5054623586,
           "qqq": 112.2364238064,
           "spy": 107.055524968
+        },
+        {
+          "date": "2026-07-24",
+          "portfolio": 101.5973643041,
+          "qqq": 110.9826053968,
+          "spy": 107.1642947051
+        },
+        {
+          "date": "2026-07-27",
+          "portfolio": 101.7235282075,
+          "qqq": 110.640364223,
+          "spy": 107.1875038726
+        },
+        {
+          "date": "2026-07-28",
+          "portfolio": 101.7859363613,
+          "qqq": 109.5649725613,
+          "spy": 107.444194433
+        },
+        {
+          "date": "2026-07-29",
+          "portfolio": 101.8153011092,
+          "qqq": 107.3330888706,
+          "spy": 105.7908997403
+        },
+        {
+          "date": "2026-07-30",
+          "portfolio": 101.7938355739,
+          "qqq": 110.8723100854,
+          "spy": 107.5645687538
+        },
+        {
+          "date": "2026-07-31",
+          "portfolio": 101.9037769758,
+          "qqq": 111.5924817425,
+          "spy": 108.3390131766
         }
       ],
       "benchmarks": [
@@ -736,25 +772,25 @@
           "label": "现金流",
           "subgroup": "短债",
           "badge": "",
-          "marketValue": 2468.1299743652,
-          "weight": 0.8003548601962025,
+          "marketValue": 2471.6999359131,
+          "weight": 0.7984000342044726,
           "positions": [
             {
               "symbol": "BOXX",
               "name": "BOXX",
               "quantity": 21.0,
-              "weight": 0.8003548602,
+              "weight": 0.7984000342,
               "totalCost": 2425.5,
               "averageCost": 115.5,
-              "lastClose": 117.5299987793,
-              "marketValue": 2468.1299743652,
-              "dailyPnl": 0.2100448608,
-              "dailyPnlPct": 8.51101e-05,
-              "unrealizedPnl": 42.6299743652,
-              "unrealizedPnlPct": 0.017575747,
-              "portfolioContributionPct": 0.0138238697,
-              "totalPnl": 46.7401743652,
-              "totalPnlPct": 0.0155644936
+              "lastClose": 117.6999969482,
+              "marketValue": 2471.6999359131,
+              "dailyPnl": 1.4699935913,
+              "dailyPnlPct": 0.0005950837,
+              "unrealizedPnl": 46.1999359131,
+              "unrealizedPnlPct": 0.0190475926,
+              "portfolioContributionPct": 0.0149233448,
+              "totalPnl": 50.3101359131,
+              "totalPnlPct": 0.016753292
             }
           ]
         },
@@ -763,42 +799,59 @@
           "label": "股息",
           "subgroup": "期权股息",
           "badge": "",
-          "marketValue": 192.8199996949,
-          "weight": 0.0625268626456901,
+          "marketValue": 240.0200042725,
+          "weight": 0.07753043839851402,
           "positions": [
             {
               "symbol": "QQQI",
               "name": "QQQI",
               "quantity": 3.0,
-              "weight": 0.0518906161,
+              "weight": 0.0513983974,
               "totalCost": 149.35,
               "averageCost": 49.7833333333,
-              "lastClose": 53.3400001526,
-              "marketValue": 160.0200004578,
-              "dailyPnl": -3.0,
-              "dailyPnlPct": -0.0184026499,
-              "unrealizedPnl": 10.6700004578,
-              "unrealizedPnlPct": 0.0714429224,
-              "portfolioContributionPct": 0.0034600231,
-              "totalPnl": 15.9200004578,
-              "totalPnlPct": 0.1065952491
+              "lastClose": 53.0400009155,
+              "marketValue": 159.1200027466,
+              "dailyPnl": 1.0800018311,
+              "dailyPnlPct": 0.0068337245,
+              "unrealizedPnl": 9.7700027466,
+              "unrealizedPnlPct": 0.0654168246,
+              "portfolioContributionPct": 0.0031558728,
+              "totalPnl": 16.7300027466,
+              "totalPnlPct": 0.1120187663
+            },
+            {
+              "symbol": "XQQI",
+              "name": "XQQI",
+              "quantity": 1.0,
+              "weight": 0.015320676,
+              "totalCost": 45.0,
+              "averageCost": 45.0,
+              "lastClose": 47.4300003052,
+              "marketValue": 47.4300003052,
+              "dailyPnl": 0.5900001526,
+              "dailyPnlPct": 0.012596075,
+              "unrealizedPnl": 2.4300003052,
+              "unrealizedPnlPct": 0.0540000068,
+              "portfolioContributionPct": 0.0007849304,
+              "totalPnl": 2.9801503052,
+              "totalPnlPct": 0.0459917837
             },
             {
               "symbol": "SCHD",
               "name": "SCHD",
               "quantity": 1.0,
-              "weight": 0.0106362465,
+              "weight": 0.010811365,
               "totalCost": 32.25,
               "averageCost": 32.25,
-              "lastClose": 32.7999992371,
-              "marketValue": 32.7999992371,
-              "dailyPnl": -0.1000022888,
-              "dailyPnlPct": -0.0030395831,
-              "unrealizedPnl": 0.5499992371,
-              "unrealizedPnlPct": 0.0170542399,
-              "portfolioContributionPct": 0.0001783515,
-              "totalPnl": 0.6508992371,
-              "totalPnlPct": 0.0102101841
+              "lastClose": 33.4700012207,
+              "marketValue": 33.4700012207,
+              "dailyPnl": 0.0600013733,
+              "dailyPnlPct": 0.0017959106,
+              "unrealizedPnl": 1.2200012207,
+              "unrealizedPnlPct": 0.0378294952,
+              "portfolioContributionPct": 0.0003940806,
+              "totalPnl": 1.3209012207,
+              "totalPnlPct": 0.0207200191
             }
           ]
         },
@@ -807,57 +860,126 @@
           "label": "杠杆",
           "subgroup": "半导体",
           "badge": "",
-          "marketValue": 18.2440002441,
-          "weight": 0.0059160880571298416,
+          "marketValue": 21.7080001831,
+          "weight": 0.007012043750486663,
           "positions": [
             {
               "symbol": "SOXS",
               "name": "SOXS",
               "quantity": 0.4,
-              "weight": 0.0059160881,
+              "weight": 0.0070120438,
               "totalCost": 14.5,
               "averageCost": 36.25,
-              "lastClose": 45.6100006104,
-              "marketValue": 18.2440002441,
-              "dailyPnl": 0.436000061,
-              "dailyPnlPct": 0.0244833814,
-              "unrealizedPnl": 3.7440002441,
-              "unrealizedPnlPct": 0.2582069134,
-              "portfolioContributionPct": 0.0012140887,
-              "totalPnl": 9.8140002441,
-              "totalPnlPct": 0.0669806186
-            }
-          ]
-        },
-        {
-          "id": "other",
-          "label": "其他",
-          "subgroup": "",
-          "badge": "策略外",
-          "marketValue": 45.6689987183,
-          "weight": 0.014809351802425449,
-          "positions": [
-            {
-              "symbol": "XBI",
-              "name": "XBI",
-              "quantity": 0.3,
-              "weight": 0.0148093518,
-              "totalCost": 46.49855,
-              "averageCost": 154.9951666667,
-              "lastClose": 152.2299957275,
-              "marketValue": 45.6689987183,
-              "dailyPnl": 0.0359985352,
-              "dailyPnlPct": 0.0007888707,
-              "unrealizedPnl": -0.8295512817,
-              "unrealizedPnlPct": -0.0178403688,
-              "portfolioContributionPct": -0.0002690034,
-              "totalPnl": -0.8295512817,
-              "totalPnlPct": -0.0178403688
+              "lastClose": 54.2700004578,
+              "marketValue": 21.7080001831,
+              "dailyPnl": 0.1400009155,
+              "dailyPnlPct": 0.0064911406,
+              "unrealizedPnl": 7.2080001831,
+              "unrealizedPnlPct": 0.4971034609,
+              "portfolioContributionPct": 0.0023283035,
+              "totalPnl": 13.2780001831,
+              "totalPnlPct": 0.0906224419
             }
           ]
         }
       ],
       "transactions": [
+        {
+          "id": "us:7842f3a4d1839dce74ca5cde",
+          "timestamp": "2026-07-29T00:00:00",
+          "symbol": "XQQI",
+          "name": "XQQI",
+          "kind": "buy",
+          "action": "Buy",
+          "quantity": 1.0,
+          "price": 45.0,
+          "amount": -45.0,
+          "fee": 0.0
+        },
+        {
+          "id": "us:7be6da2637a1f42a09d82ab6",
+          "timestamp": "2026-07-27T00:00:00",
+          "symbol": "XBI",
+          "name": "XBI",
+          "kind": "sell",
+          "action": "Sell",
+          "quantity": 0.7,
+          "price": 153.5555,
+          "amount": 107.48885,
+          "fee": 0.0
+        },
+        {
+          "id": "us:0489aeb199df7fd1695e0af8",
+          "timestamp": "2026-07-24T00:00:00",
+          "symbol": "XBI",
+          "name": "XBI",
+          "kind": "buy",
+          "action": "Buy",
+          "quantity": 0.1,
+          "price": 149.941,
+          "amount": -14.9941,
+          "fee": 0.0
+        },
+        {
+          "id": "us:4e500cd96f0ad35975198e52",
+          "timestamp": "2026-07-24T00:00:00",
+          "symbol": "QQQI",
+          "name": "QQQI",
+          "kind": "dividend",
+          "action": "Dividend",
+          "quantity": -0.19,
+          "price": 0.0,
+          "amount": -0.19,
+          "fee": 0.0
+        },
+        {
+          "id": "us:7d7150ba6cc9c1660a453b67",
+          "timestamp": "2026-07-24T00:00:00",
+          "symbol": "QQQI",
+          "name": "QQQI",
+          "kind": "dividend",
+          "action": "Dividend",
+          "quantity": 1.9,
+          "price": 0.0,
+          "amount": 1.9,
+          "fee": 0.0
+        },
+        {
+          "id": "us:05d66f926ed98652f44adb10",
+          "timestamp": "2026-07-22T00:00:00",
+          "symbol": "XBI",
+          "name": "XBI",
+          "kind": "buy",
+          "action": "Buy",
+          "quantity": 0.1,
+          "price": 152.269,
+          "amount": -15.2269,
+          "fee": 0.0
+        },
+        {
+          "id": "us:5ed94a2989b42d29ecacf79b",
+          "timestamp": "2026-07-22T00:00:00",
+          "symbol": "XBI",
+          "name": "XBI",
+          "kind": "buy",
+          "action": "Buy",
+          "quantity": 0.1,
+          "price": 152.451,
+          "amount": -15.2451,
+          "fee": 0.0
+        },
+        {
+          "id": "us:b3941c127fd58a848eee775c",
+          "timestamp": "2026-07-20T00:00:00",
+          "symbol": "XBI",
+          "name": "XBI",
+          "kind": "buy",
+          "action": "Buy",
+          "quantity": 0.1,
+          "price": 152.7587,
+          "amount": -15.27587,
+          "fee": 0.0
+        },
         {
           "id": "us:d669f0957bc6d77fd78c43ed",
           "timestamp": "2026-07-16T00:00:00",
@@ -2193,6 +2315,14 @@
       ],
       "dividends": [
         {
+          "date": "2026-07-24",
+          "symbol": "QQQI",
+          "name": "QQQI",
+          "gross": 1.9,
+          "taxAdjustment": -0.19,
+          "net": 1.71
+        },
+        {
           "date": "2026-07-10",
           "symbol": "XQQI",
           "name": "XQQI",
@@ -2260,13 +2390,13 @@
         },
         {
           "month": "2026-07",
-          "net": 0.08
+          "net": 1.79
         }
       ]
     },
     "cn": {
       "currency": "CNY",
-      "asOf": "2026-07-24",
+      "asOf": "2026-08-03",
       "summary": {
         "totalAssets": 3749.16,
         "cumulativeReturn": 0.1890363876,
@@ -5435,6 +5565,42 @@
           "portfolio": 118.9036387572,
           "sse": 125.1979873515,
           "csi300": 129.8869591503
+        },
+        {
+          "date": "2026-07-27",
+          "portfolio": 118.9036387572,
+          "sse": 126.6437947661,
+          "csi300": 131.374213768
+        },
+        {
+          "date": "2026-07-28",
+          "portfolio": 118.9036387572,
+          "sse": 125.1690035854,
+          "csi300": 127.6612316988
+        },
+        {
+          "date": "2026-07-29",
+          "portfolio": 118.9036387572,
+          "sse": 125.6664214699,
+          "csi300": 128.5199756161
+        },
+        {
+          "date": "2026-07-30",
+          "portfolio": 118.9036387572,
+          "sse": 124.885993357,
+          "csi300": 127.1079567773
+        },
+        {
+          "date": "2026-07-31",
+          "portfolio": 118.9036387572,
+          "sse": 125.7909236499,
+          "csi300": 128.1829092695
+        },
+        {
+          "date": "2026-08-03",
+          "portfolio": 118.9036387572,
+          "sse": 125.0491296172,
+          "csi300": 126.9251894304
         }
       ],
       "benchmarks": [

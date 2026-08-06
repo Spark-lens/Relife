@@ -5,6 +5,7 @@ import {
   addCategory,
   addSymbol,
   defaultWatchlist,
+  displayName,
   editSymbol,
   moveCategory,
   moveSymbol,
@@ -13,10 +14,11 @@ import {
   renameCategory,
 } from "../../src/watchlist-state.mjs";
 
-test("默认分类顺序固定且标的为空", () => {
+test("默认分类顺序固定并包含目录标的", () => {
   const state = defaultWatchlist();
   assert.deepEqual(state.categories.map((item) => item.name), ["现金流", "大盘", "股息", "个股", "杠杆", "比特币"]);
-  assert.ok(state.categories.every((item) => item.symbols.length === 0));
+  assert.ok(state.categories.every((item) => item.symbols.length > 0));
+  assert.equal(displayName(state.categories[0].symbols[0]), "短债");
 });
 
 test("分类与标的支持完整增删改", () => {
@@ -26,6 +28,9 @@ test("分类与标的支持完整增删改", () => {
   state = addSymbol(state, category.id, { market: "us", symbol: "DEMO", name: "示例", note: "旧备注" });
   state = editSymbol(state, "us:DEMO", { name: "示例科技", note: "新备注" });
   assert.equal(state.categories.at(-1).symbols[0].note, "新备注");
+  assert.equal(displayName(state.categories.at(-1).symbols[0]), "新备注");
+  state = editSymbol(state, "us:DEMO", { note: "" });
+  assert.equal(displayName(state.categories.at(-1).symbols[0]), "示例科技");
   state = removeSymbol(state, "us:DEMO");
   state = removeCategory(state, category.id);
   assert.equal(state.categories.length, 6);
@@ -46,7 +51,7 @@ test("分类和标的可排序并跨分类移动", () => {
   const second = state.categories[1].id;
   state = addSymbol(state, first, { market: "cn", symbol: "600000", name: "示例银行", note: "观察" });
   state = moveSymbol(state, "cn:600000", second, 0);
-  assert.equal(state.categories[0].symbols.length, 0);
+  assert.ok(!state.categories[0].symbols.some((item) => item.key === "cn:600000"));
   assert.equal(state.categories[1].symbols[0].key, "cn:600000");
   state = moveCategory(state, second, -1);
   assert.equal(state.categories[0].id, second);

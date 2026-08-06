@@ -17,5 +17,6 @@
   "terminal.integrated.cwd": "${workspaceFolder}",
   "debug.openDebug": "openOnSessionStart",
   "python-envs.defaultEnvManager": "ms-python.python:conda",
-  "python-envs.defaultPackageManager": "ms-python.python:conda"
+  "python-envs.defaultPackageManager": "ms-python.python:conda",
+  "relife.pythonPath": "/home/clannad/miniforge3/envs/istorm_rag_gpu/bin/python"
 }

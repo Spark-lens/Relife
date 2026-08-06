@@ -1,9 +1,27 @@
 import { randomUUID } from "node:crypto";
 
-const DEFAULT_NAMES = ["现金流", "大盘", "股息", "个股", "杠杆", "比特币"];
+const DEFAULT_SYMBOLS = [
+  // 示例行情仅用于目录首屏预览，刷新后会优先使用快照行情。
+  ["现金流", [["us", "BOXX", "短债", 117.70, 0.42, 0.0036]]],
+  ["大盘", [["us", "QQQ", "纳斯达克100 ETF", 53.84, 0.80, 0.0151], ["cn", "512100", "中证1000 ETF", 1.58, -0.03, -0.0156], ["cn", "159915", "创业板 ETF", 2.41, 0.03, 0.0126]]],
+  ["股息", [["us", "XQQI", "期权股息", 48.46, 1.04, 0.0219], ["us", "QQQI", "期权股息", 53.84, 0.80, 0.0151], ["us", "SCHD", "红利股息", 33.56, 0.09, 0.0027], ["cn", "513530", "港股红利", 1.58, -0.03, -0.0156]]],
+  ["个股", [["us", "BRK.B", "伯克希尔", 513.14, 1.60, 0.0031], ["us", "KO", "可口可乐", 68.22, 0.31, 0.0046], ["us", "GOOGL", "Alphabet", 192.37, 2.10, 0.0110], ["us", "JD", "京东", 32.14, -0.22, -0.0068]]],
+  ["杠杆", [["us", "SOXL", "半导体做多", 45.12, 0.68, 0.0153], ["us", "SOXS", "半导体做空", 17.60, -0.21, -0.0118], ["us", "YINN", "中国做多", 38.40, 0.35, 0.0092], ["us", "YANG", "中国做空", 39.13, -0.44, -0.0111], ["us", "TQQQ", "纳指做多", 84.22, 1.30, 0.0157], ["us", "SQQQ", "纳指做空", 13.11, -0.18, -0.0135]]],
+  ["比特币", [["us", "IBIT", "比特币 ETF", 61.20, 0.72, 0.0119]]],
+];
+
+export function displayName(item) {
+  return String(item?.note || "").trim() || item?.name || item?.symbol || "未命名标的";
+}
 
 export function defaultWatchlist() {
-  return { categories: DEFAULT_NAMES.map((name, index) => ({ id: `category-${index + 1}`, name, symbols: [] })) };
+  return {
+    categories: DEFAULT_SYMBOLS.map(([name, entries], index) => ({
+      id: `category-${index + 1}`,
+      name,
+      symbols: entries.map(([market, symbol, itemName, latest, change, changePercent]) => ({ market, symbol, name: itemName, note: "", key: `${market}:${symbol}`, latest, change, changePercent })),
+    })),
+  };
 }
 
 export function addSymbol(state, categoryId, symbol) {
