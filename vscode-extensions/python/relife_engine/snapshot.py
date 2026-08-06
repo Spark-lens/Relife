@@ -69,7 +69,6 @@ def build_market_snapshot(
         prices.append({"symbol": symbol, "name": position["name"], "latest": _float(latest), "change": _float(latest - previous if latest is not None and previous is not None else None), "changePercent": _float((latest - previous) / previous if latest is not None and previous else None)})
         if market_value is not None:
             distribution.append({"symbol": symbol, "name": position["name"], "value": _float(market_value)})
-    holdings.sort(key=lambda item: item["marketValue"] or 0, reverse=True)
     sold_holdings = [{
         "symbol": symbol, "name": position["name"], "quantity": 0.0,
         "averageCost": None, "remainingCost": 0.0, "lastPrice": None,
@@ -81,24 +80,26 @@ def build_market_snapshot(
     realized = sum((position["realized"] for position in ledger["allPositions"].values()), Decimal())
     net_dividends = sum((position["netDividends"] for position in ledger["allPositions"].values()), Decimal())
     portfolio_value = ledger["cash"] + sum((Decimal(str(item["value"])) for item in distribution), Decimal())
+    portfolio_value_float = float(portfolio_value) if portfolio_value else 1
+    holdings.sort(key=lambda item: (item["marketValue"] or 0) / portfolio_value_float)
     total_return = unrealized + realized + net_dividends
     daily = ledger["dailyValues"]
     total_return_rate = twr([(item["value"], item["flow"]) for item in daily])
     external_flows = [(item["timestamp"].date(), -item.get("externalFlow", Decimal())) for item in transactions if item.get("externalFlow")]
     annualized = xirr(external_flows + ([(date.fromisoformat(daily[-1]["date"]), portfolio_value)] if daily else []))
     portfolio_curve = {item["date"]: float(item["value"]) for item in daily}
+    flow_curve = {item["date"]: float(item["cash"]) for item in daily}
     common_days = sorted(set(portfolio_curve) & set(benchmark_closes))[-253:]
     portfolio_returns = _returns({day: portfolio_curve[day] for day in common_days})
     benchmark_returns = _returns({day: float(benchmark_closes[day]) for day in common_days})
     common_return_days = sorted(set(portfolio_returns) & set(benchmark_returns))
     risk = risk_metrics([portfolio_returns[day] for day in common_return_days], [benchmark_returns[day] for day in common_return_days])
-    base_portfolio = next((value for value in portfolio_curve.values() if value), None)
-    base_benchmark = next((float(value) for value in benchmark_closes.values() if value), None)
-    curve_days = sorted(set(portfolio_curve) | set(benchmark_closes))
+    curve_days = sorted(set(portfolio_curve) | set(benchmark_closes) | set(flow_curve))
     curve = [{
         "date": day,
-        "portfolio": portfolio_curve.get(day) / base_portfolio * 100 if base_portfolio and day in portfolio_curve else None,
-        "benchmark": float(benchmark_closes[day]) / base_benchmark * 100 if base_benchmark and day in benchmark_closes else None,
+        "portfolio": portfolio_curve.get(day),
+        "benchmark": float(benchmark_closes[day]) if day in benchmark_closes else None,
+        "flow": flow_curve.get(day),
     } for day in curve_days]
     all_dates = [item["timestamp"].date().isoformat() for item in transactions if item.get("timestamp")]
     all_dates.extend(day for series in closes.values() for day in series)

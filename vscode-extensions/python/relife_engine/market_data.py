@@ -1,11 +1,46 @@
 from __future__ import annotations
 
+import time
 from datetime import date, timedelta
 from decimal import Decimal
+from urllib.error import URLError
+
+from requests.exceptions import ConnectionError as RequestsConnectionError
+from requests.exceptions import HTTPError, Timeout
 
 
 def _decimal(value) -> Decimal:
     return Decimal(str(value))
+
+
+def _is_permanent_error(exc: Exception) -> bool:
+    """永久错误（如标的退市/无历史行情/404）不重试，直接交由调用方记录到 errors。"""
+    text = str(exc)
+    markers = ("404", "Not Found", "delisted", "no data", "无历史行情", "找不到", "退市")
+    return any(marker in text for marker in markers)
+
+
+def _is_retryable_error(exc: Exception) -> bool:
+    """网络类可重试错误：HTTP/超时/连接异常。"""
+    return isinstance(exc, (HTTPError, Timeout, RequestsConnectionError, URLError, ConnectionError, Timeout))
+
+
+def fetch_with_retry(fn, retries: int = 3, sleep_base: float = 1.0):
+    """执行 fn，网络类错误最多重试 retries 次（默认 3，指数退避）；永久错误直接抛出不重试。"""
+    last_exc: Exception | None = None
+    for attempt in range(1, retries + 1):
+        try:
+            return fn()
+        except Exception as exc:
+            last_exc = exc
+            if _is_permanent_error(exc):
+                raise
+            if attempt >= retries or not _is_retryable_error(exc):
+                raise
+            time.sleep(sleep_base * (2 ** (attempt - 1)))
+    if last_exc is not None:
+        raise last_exc
+
 
 
 def load_market_data(market: str, symbols: list[str]) -> tuple[dict, dict, list, list]:
@@ -18,7 +53,7 @@ def load_market_data(market: str, symbols: list[str]) -> tuple[dict, dict, list,
         for symbol in symbols:
             try:
                 ticker = yf.Ticker(symbol)
-                frame = ticker.history(period="2y", auto_adjust=False, actions=True)
+                frame = fetch_with_retry(lambda: ticker.history(period="2y", auto_adjust=False, actions=True))
                 if frame.empty:
                     raise ValueError("无历史行情")
                 closes[symbol] = {index.date().isoformat(): _decimal(row["Close"]) for index, row in frame.iterrows() if row.get("Close") == row.get("Close")}
@@ -48,7 +83,9 @@ def load_market_data(market: str, symbols: list[str]) -> tuple[dict, dict, list,
     end = date.today().strftime("%Y%m%d")
     for symbol in symbols:
         try:
-            frame = ak.stock_zh_a_hist(symbol=symbol, period="daily", start_date=start, end_date=end, adjust="qfq")
+            frame = fetch_with_retry(
+                lambda: ak.stock_zh_a_hist(symbol=symbol, period="daily", start_date=start, end_date=end, adjust="qfq")
+            )
             if frame.empty:
                 raise ValueError("无历史行情")
             closes[symbol] = {str(row["日期"])[:10]: _decimal(row["收盘"]) for _, row in frame.iterrows()}

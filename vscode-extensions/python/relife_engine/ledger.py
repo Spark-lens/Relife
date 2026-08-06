@@ -70,7 +70,7 @@ def _replay_core(market: str, transactions: list[dict]) -> dict:
 def replay(market: str, transactions: list[dict], closes: dict[str, dict[str, Decimal]] | None = None) -> dict:
     ordered = sorted(
         transactions,
-        key=lambda item: (item.get("timestamp"), -item.get("line", 0)) if item.get("timestamp") else (0, 0),
+        key=lambda item: (-item.get("timestamp", 0).timestamp() if item.get("timestamp") else 0, -item.get("line", 0)),
     )
     result = _replay_core(market, ordered)
     if not closes or not any(item.get("timestamp") for item in ordered):

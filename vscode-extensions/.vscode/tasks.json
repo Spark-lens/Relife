@@ -1,0 +1,21 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "type": "shell",
+      "command": "npm run build",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": [],
+      "label": "npm: build",
+      "detail": "vite build",
+      "options": {
+        "env": {
+          "PATH": "/home/clannad/.nvm/versions/node/v22.19.0/bin:${env:PATH}"
+        }
+      }
+    }
+  ]
+}

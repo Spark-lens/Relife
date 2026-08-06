@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 
 from relife_engine.service import build_snapshot
-from relife_engine.sources import validate_source
+from relife_engine.sources import discover_latest, validate_source
 
 
 def main() -> int:
@@ -14,7 +14,10 @@ def main() -> int:
         payload = json.load(sys.stdin)
         command = payload.get("command")
         if command == "validate-source":
-            result = validate_source(Path(payload["path"]), payload["market"])
+            target = Path(payload["path"])
+            if target.is_dir():
+                target = discover_latest(target, payload["market"])
+            result = validate_source(target, payload["market"])
         elif command == "build-snapshot":
             result = build_snapshot(payload)
         else:
