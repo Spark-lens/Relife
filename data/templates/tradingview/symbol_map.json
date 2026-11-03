@@ -1,0 +1,23 @@
+{
+  "ALM": "NASDAQ:ALM",
+  "BOXX": "CBOE:BOXX",
+  "BRKB": "NYSE:BRK.B",
+  "CAMT": "NASDAQ:CAMT",
+  "GGLL": "NASDAQ:GGLL",
+  "GOOG": "NASDAQ:GOOG",
+  "HSBC": "NYSE:HSBC",
+  "IQQ": "NASDAQ:IQQ",
+  "JD": "NASDAQ:JD",
+  "JEPQ": "NASDAQ:JEPQ",
+  "NOK": "NYSE:NOK",
+  "QQQI": "NASDAQ:QQQI",
+  "QQQM": "NASDAQ:QQQM",
+  "SCHD": "AMEX:SCHD",
+  "SOXS": "AMEX:SOXS",
+  "SPYI": "CBOE:SPYI",
+  "SQQQ": "NASDAQ:SQQQ",
+  "SSPC": "CBOE:SSPC",
+  "XBI": "AMEX:XBI",
+  "XQQI": "NASDAQ:XQQI",
+  "YANG": "AMEX:YANG"
+}

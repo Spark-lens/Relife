@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.pytest_cache/
+
+# Local environments and secrets
+.env
+.env.*
+env/
+venv/
+.venv/
+
+# Local agent and IDE state
+.agents/
+.codex/
+.codebuddy/
+.superpowers/
+.vscode/
+
+# OS and logs
+.DS_Store
+*.log
