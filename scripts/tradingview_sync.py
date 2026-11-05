@@ -220,6 +220,12 @@ def parse_schwab_row(row: dict[str, str], broker: str) -> NormalizedTransaction:
     )
 
 
+def select_candidate_transactions(
+    transactions: Iterable[NormalizedTransaction], cutoff: date
+) -> list[NormalizedTransaction]:
+    return [tx for tx in transactions if tx.trade_date >= cutoff]
+
+
 def resolve_transactions_path(root: Path, broker: str, supplied: str | None) -> Path:
     broker_dir = root / BROKER_DIRS[broker]
     if supplied:
@@ -449,7 +455,7 @@ def main() -> int:
     current_max_dt = max(parse_tv_datetime(row["Closing Time"]) for row in current_rows)
     cutoff = current_max_dt.date()
     normalized_txs = [parse_schwab_row(row, args.broker) for row in schwab_rows]
-    candidate_txs = [tx for tx in normalized_txs if tx.trade_date > cutoff]
+    candidate_txs = select_candidate_transactions(normalized_txs, cutoff)
     symbol_map, added_symbol_mappings = ensure_symbol_map_for_transactions(
         current_rows,
         symbol_overrides,
@@ -520,7 +526,7 @@ def main() -> int:
     print(f"- 当前全量文件：{current_full_path}")
     print(f"- 截止日期：{cutoff.isoformat()}")
     print(f"- 原始记录数：{len(normalized_txs)}")
-    print(f"- 截止日期后的候选记录数：{len(candidate_txs)}")
+    print(f"- 不早于截止日期的候选记录数：{len(candidate_txs)}")
     print(f"- 新增记录数：{len(added_rows)}")
     print(f"- 跳过的 Journal 记录数：{skipped_journal}")
     print(f"- 跳过的已存在记录数：{skipped_existing}")
